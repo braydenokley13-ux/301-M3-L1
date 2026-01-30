@@ -1,0 +1,869 @@
+/*******************************************************
+ * BOW Track 301 — Module 3 Lesson 1
+ * Structural Leverage SIM — Apps Script (Part 0–1)
+ * Each student uses their own spreadsheet copy.
+ *******************************************************/
+
+const TZ = "America/New_York";
+
+/** ---------- PART 0: CONFIG + HELPERS ---------- **/
+
+function getSheet_(name) {
+  const ss = SpreadsheetApp.getActive();
+  const sh = ss.getSheetByName(name);
+  if (!sh) throw new Error(`Missing sheet: ${name}`);
+  return sh;
+}
+
+/**
+ * Reads CONFIG as a simple key/value table:
+ * Column A = key, Column B = value
+ */
+function getConfig_() {
+  const sh = getSheet_("CONFIG");
+  const values = sh.getRange("A1:C200").getValues(); // wide enough
+  const cfg = {};
+  for (let i = 0; i < values.length; i++) {
+    const key = String(values[i][0] || "").trim();
+    const val = values[i][1];
+    if (key) cfg[key] = val;
+  }
+
+  // Minimal required keys
+  const required = [
+    "LESSON_CODE","TRACK","MODULE","LESSON_NUM",
+    "MASTER_SPREADSHEET_ID","MASTER_CLAIM_CODES_TAB",
+    "STUDENT_NAME_CELL","STUDENT_EMAIL_CELL",
+    "PHASE1_RANGE","PHASE2_RANGE","PHASE3_RANGE","PHASE4_RANGE",
+    "TOTAL_POINTS","GOLD_MIN","SILVER_MIN","BRONZE_MIN",
+    "GOLD_XP","SILVER_XP","BRONZE_XP",
+    "HASH_SALT"
+  ];
+  const missing = required.filter(k => !cfg[k]);
+  if (missing.length) throw new Error("CONFIG missing keys: " + missing.join(", "));
+  /***********************
+   * HARD OVERRIDE RANGES
+   * (based on the real dropdown locations)
+   ***********************/
+  cfg["PHASE1_RANGE"] = "PHASE_1!C25:C27";
+  cfg["PHASE2_RANGE"] = "PHASE_2!C22:C56";
+  cfg["PHASE3_RANGE"] = "PHASE_3!C16:E18";
+  cfg["PHASE4_RANGE"] = "PHASE_4!C18:C19";
+
+  return cfg;
+}
+
+function a1_(a1) {
+  // a1 like "PHASE_1!E16:E18"
+  const [sheetName, rng] = a1.split("!");
+  return getSheet_(sheetName).getRange(rng);
+}
+
+function ui_() { return SpreadsheetApp.getUi(); }
+
+function alert_(title, msg) {
+  ui_().alert(title, msg, ui_().ButtonSet.OK);
+}
+
+function now_() {
+  return Utilities.formatDate(new Date(), TZ, "yyyy-MM-dd HH:mm:ss");
+}
+
+/** SIM state stored per spreadsheet copy */
+function simProps_() {
+  return PropertiesService.getDocumentProperties();
+}
+
+function setSimState_(key, value) {
+  simProps_().setProperty(key, JSON.stringify(value));
+}
+
+function getSimState_(key, fallback) {
+  const raw = simProps_().getProperty(key);
+  if (!raw) return fallback;
+  try { return JSON.parse(raw); } catch (e) { return fallback; }
+}
+/** ---------- PART 1: UI + IDENTITY ---------- **/
+
+function onOpen() {
+  const ui = ui_();
+  ui.createMenu("BOW · Structural Leverage SIM")
+    .addItem("Open SIM Console", "openSimConsole")
+    .addSeparator()
+  .addItem("Set Identity (First Time)", "ensureStudentIdentity")
+.addItem("Change Identity", "changeStudentIdentity")
+.addItem("Run SIM (Grade + Claim Code)", "runSim_M3L1")
+    .addSeparator()
+    .addItem("Reset Attempt (Clear Answers)", "resetAttempt_M3L1")
+    .addToUi();
+}
+
+/**
+ * Sidebar = makes it feel like a real simulation.
+ * Students can run identity + run sim from inside the console.
+ */
+function openSimConsole() {
+  const html = HtmlService.createHtmlOutput(getSimConsoleHtml_())
+    .setTitle("BOW SIM Console");
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+function getSimConsoleHtml_() {
+  return `
+  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; padding: 14px;">
+    <div style="background:#0B1F3B;color:#fff;border-radius:14px;padding:14px 14px 12px;">
+      <div style="font-size:12px;letter-spacing:.18em;opacity:.8;">BOW · TRACK 301</div>
+      <div style="font-size:20px;font-weight:800;line-height:1.2;margin-top:6px;">Structural Leverage SIM</div>
+      <div style="font-size:12px;opacity:.85;margin-top:6px;">
+        Negotiations aren’t won with arguments — they’re won with alternatives.
+      </div>
+    </div>
+
+    <div style="margin-top:12px;background:#F3F6FB;border:1px solid #CBD5E1;border-radius:14px;padding:12px;">
+      <div style="font-weight:800;color:#0B1F3B;">Mission Briefing</div>
+      <div style="color:#334155;margin-top:8px;font-size:13px;line-height:1.45;">
+        You will evaluate three negotiations across four phases.
+        Your job is to detect leverage, track how it shifts, diagnose what caused the shift,
+        then run the walk-away test.
+      </div>
+      <ul style="margin:10px 0 0 18px;color:#334155;font-size:13px;line-height:1.5;">
+        <li>Phase 1: Identify leverage holder</li>
+        <li>Phase 2: Track shifts under updates</li>
+        <li>Phase 3: Diagnose drivers (replaceability + dependence)</li>
+        <li>Phase 4: Walk-away test</li>
+      </ul>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:12px;">
+      <button onclick="google.script.run.ensureStudentIdentity()"
+        style="flex:1;background:#2563EB;border:none;color:#fff;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer;">
+        Set Identity
+      </button>
+      <button onclick="google.script.run.runSim_M3L1()"
+        style="flex:1;background:#0B1F3B;border:none;color:#fff;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer;">
+        Run SIM
+      </button>
+    </div>
+
+    <div style="margin-top:10px;">
+      <button onclick="google.script.run.resetAttempt_M3L1()"
+        style="width:100%;background:#fff;border:1px solid #CBD5E1;color:#0B1F3B;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer;">
+        Reset Attempt
+      </button>
+    </div>
+
+    <div style="margin-top:12px;color:#64748B;font-size:12px;">
+      Tip: Your claim code is deterministic. Same name/email + lesson + tier = same code.
+    </div>
+  </div>`;
+}
+
+/**
+ * Prompts for student name/email and stores into ANSWER_KEY cells (via CONFIG).
+ * Students can update if they want.
+ */
+function ensureStudentIdentity() {
+  const cfg = getConfig_();
+
+  const nameRange = a1_(cfg["STUDENT_NAME_CELL"]);
+  const emailRange = a1_(cfg["STUDENT_EMAIL_CELL"]);
+
+  const existingName = String(nameRange.getValue() || "").trim();
+  const existingEmail = String(emailRange.getValue() || "").trim();
+
+  // If already set, do NOT prompt. Just return silently.
+  if (existingName && existingEmail) {
+    // Also keep a lightweight profile sheet up-to-date (optional)
+    try { writeStudentProfile_(existingName, existingEmail); } catch (e) {}
+    setSimState_("student_profile", { name: existingName, email: existingEmail, updated_at: now_() });
+    return { name: existingName, email: existingEmail };
+  }
+
+  // Otherwise, prompt once
+  const name = promptText_("Enter your full name (used for initials on claim code):");
+  const email = promptEmail_("Enter your email (claim code will be issued to this address):");
+
+  nameRange.setValue(name);
+  emailRange.setValue(email);
+
+  writeStudentProfile_(name, email);
+  setSimState_("student_profile", { name, email, updated_at: now_() });
+
+  alert_("Identity saved", `Locked in.\n\nName: ${name}\nEmail: ${email}\n\nReturn to the SIM Console and run the simulation.`);
+  return { name, email };
+}
+function changeStudentIdentity() {
+  const cfg = getConfig_();
+
+  const name = promptText_("Update your full name:");
+  const email = promptEmail_("Update your email:");
+
+  a1_(cfg["STUDENT_NAME_CELL"]).setValue(name);
+  a1_(cfg["STUDENT_EMAIL_CELL"]).setValue(email);
+
+  writeStudentProfile_(name, email);
+  setSimState_("student_profile", { name, email, updated_at: now_() });
+
+  alert_("Identity updated", `Updated.\n\nName: ${name}\nEmail: ${email}`);
+  return { name, email };
+}
+function writeStudentProfile_(name, email) {
+  const prof = getOrCreateProfileSheet_();
+
+  prof.getRange("A1").setValue("Student Name");
+  prof.getRange("B1").setValue(name);
+
+  prof.getRange("A2").setValue("Student Email");
+  prof.getRange("B2").setValue(email);
+
+  prof.getRange("A3").setValue("Last Updated");
+  prof.getRange("B3").setValue(now_());
+}
+
+function getOrCreateProfileSheet_() {
+  const ss = SpreadsheetApp.getActive();
+  let sh = ss.getSheetByName("STUDENT_PROFILE");
+  if (!sh) sh = ss.insertSheet("STUDENT_PROFILE");
+  return sh;
+}
+
+function promptText_(msg) {
+  const ui = ui_();
+  const res = ui.prompt("BOW SIM", msg, ui.ButtonSet.OK_CANCEL);
+  if (res.getSelectedButton() !== ui.Button.OK) throw new Error("User cancelled.");
+  const text = String(res.getResponseText() || "").trim();
+  if (!text) throw new Error("Blank input.");
+  return text;
+}
+
+function promptEmail_(msg) {
+  const email = promptText_(msg);
+  // Basic validation — strong enough for student usage
+  if (!email.includes("@") || !email.includes(".")) {
+    throw new Error("That email does not look valid. Please run again.");
+  }
+  return email.toLowerCase();
+}
+/** ---------- PART 2: COLLECT + VALIDATE + SCORE ---------- **/
+
+/**
+ * Main runner called by menu + SIM Console.
+ * Part 2 handles: identity -> collect -> validate -> score
+ * Part 3 handles: tier -> claim code -> student output
+ */
+function runSim_M3L1() {
+  const cfg = getConfig_();
+
+  // Ensure identity exists (or prompt)
+  const profile = ensureStudentIdentitySafe_();
+
+  // Collect all responses from configured ranges
+  const attempt = collectAttempt_(cfg);
+
+  // Validate
+  const validation = validateAttempt_(attempt);
+  if (!validation.ok) {
+    alert_("SIM Incomplete", "You have missing or invalid selections:\n\n" + validation.issues.join("\n"));
+    appendLocalLogMinimal_(cfg, profile, { pushed:false, notes:"Validation failed: " + validation.issues.join(" | ") });
+    return;
+  }
+
+  // Score
+  const key = loadAnswerKeyFlat_(cfg);
+  const scored = scoreAttempt_(attempt, key, cfg);
+
+  // Continue to Part 3
+  finalizeAttempt_M3L1_(cfg, profile, attempt, scored);
+}
+
+/**
+ * Reads identity from ANSWER_KEY cells; if empty, prompts.
+ */
+function ensureStudentIdentitySafe_() {
+  try {
+    const cfg = getConfig_();
+    const name = String(a1_(cfg["STUDENT_NAME_CELL"]).getValue() || "").trim();
+    const email = String(a1_(cfg["STUDENT_EMAIL_CELL"]).getValue() || "").trim();
+    if (name && email) return { name, email };
+    return ensureStudentIdentity(); // will prompt + store
+  } catch (e) {
+    // If prompt cancelled, stop cleanly
+    alert_("SIM Cancelled", String(e.message || e));
+    throw e;
+  }
+}
+
+/**
+ * Pulls response arrays per phase and returns a normalized attempt object.
+ */
+/**
+ * Collect ONLY cells that are intended inputs (dropdown / validation cells).
+ * This prevents blank spacer/header cells from triggering SIM Incomplete.
+ */
+function collectAttempt_(cfg) {
+  const p1 = collectValidatedCells_(cfg["PHASE1_RANGE"]);
+  const p2 = collectValidatedCells_(cfg["PHASE2_RANGE"]);
+  const p3 = collectValidatedCells_(cfg["PHASE3_RANGE"]);
+  const p4 = collectValidatedCells_(cfg["PHASE4_RANGE"]);
+
+  return {
+    phase1: p1.values,
+    phase2: p2.values,
+    phase3: p3.values,
+    phase4: p4.values,
+    all: [...p1.values, ...p2.values, ...p3.values, ...p4.values],
+    // For debugging / pinpointing missing answers
+    meta: { p1, p2, p3, p4 }
+  };
+}
+
+/**
+ * Returns only cells that have data validation set (dropdowns).
+ * Output includes A1 list so we can point to EXACT missing cells.
+ */
+function collectValidatedCells_(rangeA1) {
+  const r = a1_(rangeA1);
+  const rules = r.getDataValidations(); // 2D array
+  const vals  = r.getValues();          // 2D array
+
+  const outValues = [];
+  const outA1 = [];
+
+  for (let i = 0; i < rules.length; i++) {
+    for (let j = 0; j < rules[0].length; j++) {
+      const hasRule = rules[i][j] !== null; // dropdown/validation present
+      if (!hasRule) continue;
+
+      const v = String(vals[i][j] || "").trim();
+      outValues.push(v);
+
+      const cell = r.getCell(i + 1, j + 1);
+      outA1.push(`${cell.getSheet().getName()}!${cell.getA1Notation()}`);
+    }
+  }
+
+  return { values: outValues, a1: outA1, rangeA1 };
+}
+
+/**
+ * Validation:
+ * - Only validate the collected dropdown cells
+ * - Report missing cells by A1 location, not "Answer #"
+ */
+function validateAttempt_(attempt) {
+  const issues = [];
+
+  const all = attempt.all;
+  const allA1 = [
+    ...attempt.meta.p1.a1,
+    ...attempt.meta.p2.a1,
+    ...attempt.meta.p3.a1,
+    ...attempt.meta.p4.a1
+  ];
+
+  for (let i = 0; i < all.length; i++) {
+    if (!all[i]) issues.push(`Missing selection at ${allA1[i]}`);
+  }
+
+  return { ok: issues.length === 0, issues };
+}
+
+/**
+ * Loads correct answers as a flat list from ANSWER_KEY.
+ * Assumption: the correct answers are listed in one column in the same order as attempt.all
+ *
+ * You can implement a QuestionID map later if needed.
+ */
+function loadAnswerKeyFlat_(cfg) {
+  const sh = getSheet_("ANSWER_KEY");
+
+  // Try to find a simple "Correct Answers" column.
+  // Default: B6:B200 (common place), but we’ll search for a header "Correct Answer" in row 5–15.
+  const scan = sh.getRange("A1:Z30").getValues();
+  let headerRow = -1, headerCol = -1;
+
+  for (let r = 0; r < scan.length; r++) {
+    for (let c = 0; c < scan[r].length; c++) {
+      const cell = String(scan[r][c] || "").trim().toLowerCase();
+      if (cell === "correct answer" || cell === "correct answers") {
+        headerRow = r;
+        headerCol = c;
+        break;
+      }
+    }
+    if (headerRow !== -1) break;
+  }
+
+  if (headerRow === -1) {
+    // fallback to B6:B200
+    return sh.getRange("B6:B200").getValues().flat().map(v => String(v || "").trim()).filter(Boolean);
+  }
+
+  // Pull downward until blanks
+  const startR = headerRow + 2; // 1 row below header
+  const colLetter = String.fromCharCode("A".charCodeAt(0) + headerCol);
+  const rng = `${colLetter}${startR}:${colLetter}500`;
+  const vals = sh.getRange(rng).getValues().flat().map(v => String(v || "").trim());
+  const out = [];
+  for (const v of vals) {
+    if (!v) break;
+    out.push(v);
+  }
+  return out;
+}
+
+function scoreAttempt_(attempt, keyFlat, cfg) {
+  const total = Number(cfg["TOTAL_POINTS"]);
+  const answers = attempt.all;
+
+  // If key shorter, score only what exists (but warn in notes)
+  const n = Math.min(answers.length, keyFlat.length);
+  let correct = 0;
+  const missed = [];
+
+  for (let i = 0; i < n; i++) {
+    const a = answers[i];
+    const k = keyFlat[i];
+    if (a === k) correct++;
+    else missed.push({ idx: i+1, your: a, correct: k });
+  }
+
+  const score = correct;
+  const coverageIssue = (keyFlat.length !== answers.length);
+
+  return {
+    score,
+    total: total || answers.length,
+    correct,
+    attempted: answers.length,
+    keyCount: keyFlat.length,
+    coverageIssue,
+    missed
+  };
+}
+/** ---------- PART 3: TIER + CLAIM CODE + STUDENT OUTPUT ---------- **/
+
+function finalizeAttempt_M3L1_preview_(cfg, profile, attempt, scored) {
+
+  const tier = tierFromScore_(scored.score, cfg);
+  const xp = xpForTier_(tier, cfg);
+
+  // Deterministic claim code (same email+lesson+tier)
+  const claimCode = (tier === "FAIL") ? "" : makeClaimCodeDeterministic_(tier, profile, cfg);
+
+  // Write a dramatic, sim-like result summary into RESULTS_DASHBOARD (optional)
+  writeResultsCard_(cfg, profile, scored, tier, xp, claimCode);
+
+  // Local submissions log (always append, even fails)
+  appendLocalSubmissionLog_(cfg, profile, scored, tier, xp, claimCode);
+
+  // For Parts 2–3: we do NOT push to master yet.
+  // That happens in Parts 4–5.
+  if (tier === "FAIL") {
+    alert_("SIM Result: FAIL", buildShortAlert_(profile, scored, tier, xp, claimCode));
+  } else {
+    alert_("SIM Result: " + tier, buildShortAlert_(profile, scored, tier, xp, claimCode));
+  }
+
+  // Store last result in SIM state for next steps (Parts 4–5)
+  setSimState_("last_result", {
+    profile, scored, tier, xp, claimCode, timestamp: now_()
+  });
+
+  // If you want: auto-navigate to dashboard
+  try {
+    SpreadsheetApp.getActive().setActiveSheet(getSheet_("RESULTS_DASHBOARD"));
+  } catch (e) {}
+}
+
+function tierFromScore_(score, cfg) {
+  const s = Number(score);
+  const g = Number(cfg["GOLD_MIN"]);
+  const si = Number(cfg["SILVER_MIN"]);
+  const b = Number(cfg["BRONZE_MIN"]);
+  if (s >= g) return "GOLD";
+  if (s >= si) return "SILVER";
+  if (s >= b) return "BRONZE";
+  return "FAIL";
+}
+
+function xpForTier_(tier, cfg) {
+  if (tier === "GOLD") return Number(cfg["GOLD_XP"]);
+  if (tier === "SILVER") return Number(cfg["SILVER_XP"]);
+  if (tier === "BRONZE") return Number(cfg["BRONZE_XP"]);
+  return 0;
+}
+
+/**
+ * Deterministic code format aligned to your existing style:
+ * {LESSON_CODE}-{TIER}-{INITIALS}-{HASH6}
+ *
+ * HASH6 derived from email + lesson + salt so it is stable.
+ */
+function makeClaimCodeDeterministic_(tier, profile, cfg) {
+  const lesson = String(cfg["LESSON_CODE"]).trim();
+  const initials = makeInitials_(profile.name);
+  const salt = String(cfg["HASH_SALT"] || "BOW");
+  const hash6 = hash6_(profile.email + "|" + lesson + "|" + tier + "|" + salt);
+  return `${lesson}-${tier}-${initials}-${hash6}`;
+}
+
+function makeInitials_(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "XX";
+  const first = parts[0][0] || "X";
+  const last = (parts.length === 1 ? parts[0][parts[0].length-1] : parts[parts.length-1][0]) || "X";
+  return (first + last).toUpperCase();
+}
+
+function hash6_(input) {
+  const bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, input, Utilities.Charset.UTF_8);
+  // Convert first 4 bytes to base36-like string
+  let num = 0;
+  for (let i = 0; i < 4; i++) num = (num << 8) + (bytes[i] & 0xff);
+  const out = num.toString(36).toUpperCase();
+  return out.padStart(6, "0").slice(0, 6);
+}
+
+/**
+ * Writes a “SIM Outcome Card” to RESULTS_DASHBOARD if configured.
+ * If no dashboard exists, it silently skips.
+ */
+function writeResultsCard_(cfg, profile, scored, tier, xp, claimCode) {
+  let dash;
+  try { dash = getSheet_("RESULTS_DASHBOARD"); } catch (e) { return; }
+
+  // Layout targets (you can change later)
+  // We'll paint a card starting at B4
+  const startRow = 4, startCol = 2; // B4
+  const width = 8, height = 16;
+
+  // Clear card area
+  dash.getRange(startRow, startCol, height, width).clearContent().clearFormat();
+
+  // Styles
+  const navy = "#0B1F3B";
+  const blue = "#2563EB";
+  const slate = "#F3F6FB";
+  const text = "#0B1F3B";
+  const muted = "#475569";
+
+  // Header
+  const header = dash.getRange(startRow, startCol, 2, width);
+header.merge();
+header
+  .setValue("SIM OUTCOME — STRUCTURAL LEVERAGE")
+  .setBackground(navy)
+  .setFontColor("white")
+  .setFontWeight("bold")
+  .setHorizontalAlignment("center")
+  .setVerticalAlignment("middle")
+  .setFontSize(14)
+  .setFontFamily("Arial");
+
+
+// Player line
+const playerLine = dash.getRange(startRow+2, startCol, 1, width);
+playerLine.merge();
+playerLine
+  .setValue(`Analyst: ${profile.name}   |   ${profile.email}`)
+  .setBackground(slate)
+  .setFontColor(muted)
+  .setFontSize(10)
+  .setHorizontalAlignment("center")
+  .setVerticalAlignment("middle")
+  .setFontFamily("Arial");
+
+
+  // Score + Tier block
+  dash.getRange(startRow+4, startCol, 4, width).setBackground("#FFFFFF").setBorder(true,true,true,true,true,true);
+
+  dash.getRange(startRow+4, startCol, 1, 3).merge().setValue("SCORE")
+    .setFontWeight("bold").setFontColor(text);
+  dash.getRange(startRow+5, startCol, 2, 3).merge()
+    .setValue(`${scored.score} / ${cfg["TOTAL_POINTS"]}`)
+    .setFontSize(22).setFontWeight("bold").setFontColor(text);
+
+  dash.getRange(startRow+4, startCol+3, 1, 5).merge().setValue("TIER")
+    .setFontWeight("bold").setFontColor(text);
+  dash.getRange(startRow+5, startCol+3, 2, 5).merge()
+    .setValue(tier)
+    .setFontSize(22).setFontWeight("bold")
+    .setFontColor("white")
+    .setBackground(tierColor_(tier));
+
+  dash.getRange(startRow+7, startCol+3, 1, 5).merge()
+    .setValue(`XP (row value): ${xp}`)
+    .setFontColor(muted).setHorizontalAlignment("center");
+
+// Claim code area
+const ccTitle = dash.getRange(startRow+9, startCol, 1, width);
+ccTitle.merge();
+ccTitle
+  .setValue("CLAIM CODE")
+  .setBackground(blue)
+  .setFontColor("white")
+  .setFontWeight("bold")
+  .setHorizontalAlignment("center")
+  .setVerticalAlignment("middle")
+  .setFontFamily("Arial");
+
+const ccBox = dash.getRange(startRow+10, startCol, 2, width);
+ccBox.merge();
+ccBox
+  .setValue(claimCode ? claimCode : "NO CLAIM CODE — RUN SIM AGAIN")
+  .setFontFamily("Consolas")
+  .setFontSize(14)
+  .setFontWeight("bold")
+  .setHorizontalAlignment("center")
+  .setVerticalAlignment("middle")
+  .setBackground("#FFFFFF")
+  .setBorder(true,true,true,true,true,true);
+
+// Missed items summary
+const missText = buildMissSummary_(scored);
+
+const missBox = dash.getRange(startRow + 13, startCol, 3, width);
+missBox.merge();
+missBox
+  .setValue(missText)
+  .setFontColor(muted)
+  .setFontSize(10)
+  .setWrap(true)
+  .setVerticalAlignment("top")
+  .setFontFamily("Arial");
+
+
+  // Optional single-cell score write
+  try {
+    const cellA1 = cfg["OPTIONAL_RESULTS_CELL"];
+    if (cellA1) a1_(cellA1).setValue(scored.score);
+  } catch (e) {}
+}
+
+function tierColor_(tier) {
+  if (tier === "GOLD") return "#B45309";   // gold-ish
+  if (tier === "SILVER") return "#334155"; // slate
+  if (tier === "BRONZE") return "#7C2D12"; // bronze-ish
+  return "#DC2626"; // fail red
+}
+
+function buildMissSummary_(scored) {
+  if (scored.coverageIssue) {
+    return `SYSTEM NOTE: Answer key length (${scored.keyCount}) does not match attempt length (${scored.attempted}). Fix ANSWER_KEY or CONFIG ranges.`;
+  }
+  if (!scored.missed.length) return "Perfect run. Leverage read was clean across all phases.";
+  const top = scored.missed.slice(0, 6).map(m => `#${m.idx}`).join(", ");
+  const more = scored.missed.length > 6 ? ` +${scored.missed.length-6} more` : "";
+  return `Review checkpoint(s): ${top}${more}. Re-run SIM to improve your leverage read.`;
+}
+
+/**
+ * Local log append (full detail)
+ */
+function appendLocalSubmissionLog_(cfg, profile, scored, tier, xp, claimCode) {
+  let sh;
+  try { sh = getSheet_("SUBMISSIONS_LOG"); } catch (e) { return; }
+
+  const row = [
+    now_(),
+    profile.name,
+    profile.email,
+    cfg["LESSON_CODE"],
+    scored.score,
+    tier,
+    xp,
+    claimCode,
+    "FALSE", // pushed to master? (Parts 4–5 will update to TRUE)
+    "",
+    buildLogNotes_(scored)
+  ];
+  sh.appendRow(row);
+}
+
+function buildLogNotes_(scored) {
+  if (scored.coverageIssue) return `KEY/ATTEMPT mismatch: key=${scored.keyCount}, attempt=${scored.attempted}`;
+  if (!scored.missed.length) return "Perfect";
+  return "Missed: " + scored.missed.slice(0, 12).map(m => `#${m.idx}`).join(", ");
+}
+
+/**
+ * Minimal log helper used by Part 2 validation failure
+ */
+function appendLocalLogMinimal_(cfg, profile, meta) {
+  let sh;
+  try { sh = getSheet_("SUBMISSIONS_LOG"); } catch (e) { return; }
+  sh.appendRow([now_(), profile.name, profile.email, cfg["LESSON_CODE"], "", "", "", "", String(meta.pushed), "", meta.notes || ""]);
+}
+
+function buildShortAlert_(profile, scored, tier, xp, claimCode) {
+  const lines = [
+    `Analyst: ${profile.name}`,
+    `Score: ${scored.score} / ${cfgValueSafe_("TOTAL_POINTS")}`,
+    `Tier: ${tier}`,
+    `XP Row Value: ${xp}`
+  ];
+  if (claimCode) lines.push(`Claim Code: ${claimCode}`);
+  lines.push("");
+  lines.push("Your result has been written to RESULTS_DASHBOARD and logged.");
+  return lines.join("\n");
+}
+
+function cfgValueSafe_(key) {
+  try { return getConfig_()[key]; } catch (e) { return ""; }
+}
+
+/**
+ * Clears only student response ranges (no system sheets touched).
+ */
+function resetAttempt_M3L1() {
+  const cfg = getConfig_();
+  a1_(cfg["PHASE1_RANGE"]).clearContent();
+  a1_(cfg["PHASE2_RANGE"]).clearContent();
+  a1_(cfg["PHASE3_RANGE"]).clearContent();
+  a1_(cfg["PHASE4_RANGE"]).clearContent();
+  alert_("Reset complete", "All selections cleared. Re-run the SIM when ready.");
+}
+/** ---------- PART 4: MASTER ROW PAYLOAD + PUSH ---------- **/
+
+function getMasterRowPayload_(cfg, profile, tier, xp, claimCode) {
+  // You can set these in CONFIG later; default here for now.
+  const theme = cfg["THEME_DEFAULT"] || "Structural Leverage";
+  const completionType = cfg["TYPE_VALUE"] || "LESSON";
+  const claimType = cfg["CLAIM_TYPE_DEFAULT"] || "TRACK301";
+
+  // issued_eligible = TRUE only if student earned a tier (not FAIL)
+  const eligible = (tier !== "FAIL");
+
+  // EXACT MASTER HEADER ORDER:
+  // code | track | module | lesson | issued_to_email | is_used | theme | xp | completion_type | teir | issued_eligible | claim_type
+  return [
+    claimCode,                      // code
+    Number(cfg["TRACK"]),           // track
+    Number(cfg["MODULE"]),          // module
+    Number(cfg["LESSON_NUM"]),      // lesson
+    profile.email,                  // issued_to_email
+    false,                          // is_used
+    theme,                          // theme
+    xp,                             // xp
+    completionType,                 // completion_type
+    tier,                           // teir (yes, spelled teir in your master)
+    eligible,                       // issued_eligible
+    claimType                       // claim_type
+  ];
+}
+
+/**
+ * Appends a row to master Claim_Codes tab.
+ * Returns an object with push status + row index (best-effort).
+ */
+function pushToMasterClaimCodes_(cfg, rowPayload) {
+  const masterId = String(cfg["MASTER_SPREADSHEET_ID"]).trim();
+  const tabName  = String(cfg["MASTER_CLAIM_CODES_TAB"]).trim();
+
+  const master = SpreadsheetApp.openById(masterId);
+  const sh = master.getSheetByName(tabName);
+  if (!sh) throw new Error(`MASTER missing tab: ${tabName}`);
+
+  // Append
+  sh.appendRow(rowPayload);
+
+  // Best-effort row id (last row after append)
+  const rowId = sh.getLastRow();
+  return { ok: true, rowId };
+}
+/** ---------- PART 5: FINALIZE + PUSH + LOG (OVERRIDE FINALIZER) ---------- **/
+
+/**
+ * REPLACES the earlier finalizeAttempt_M3L1_ logic by pushing to master.
+ * If you pasted earlier finalizeAttempt_M3L1_ already, keep this function name the same
+ * and it will take precedence (last definition wins).
+ */
+function finalizeAttempt_M3L1_(cfg, profile, attempt, scored) {
+  const tier = tierFromScore_(scored.score, cfg);
+  const xp = xpForTier_(tier, cfg);
+
+  // Deterministic claim code
+  const claimCode = (tier === "FAIL") ? "" : makeClaimCodeDeterministic_(tier, profile, cfg);
+
+  // Student-facing output (always)
+  writeResultsCard_(cfg, profile, scored, tier, xp, claimCode);
+
+  // Push policy:
+  // - FAIL => do NOT push
+  // - otherwise push claim code row into MASTER Claim_Codes
+  let pushed = false;
+  let masterRowId = "";
+  let masterNotes = "";
+
+  if (tier !== "FAIL") {
+    try {
+      const payload = getMasterRowPayload_(cfg, profile, tier, xp, claimCode);
+      const res = pushToMasterClaimCodes_(cfg, payload);
+      pushed = true;
+      masterRowId = String(res.rowId || "");
+      masterNotes = "Appended";
+    } catch (e) {
+      pushed = false;
+      masterNotes = "Push failed: " + String(e.message || e);
+    }
+  } else {
+    masterNotes = "Not eligible (FAIL tier)";
+  }
+
+  // Log every attempt locally (includes push status)
+  appendLocalSubmissionLogV2_(cfg, profile, scored, tier, xp, claimCode, pushed, masterRowId, masterNotes);
+
+  // Store last result (for future UI or re-push tooling)
+  setSimState_("last_result", {
+    profile, scored, tier, xp, claimCode,
+    pushed, masterRowId, masterNotes,
+    timestamp: now_()
+  });
+
+  // Alert
+  alert_("SIM Result: " + tier, buildFinalAlert_(cfg, profile, scored, tier, xp, claimCode, pushed, masterNotes));
+
+  // Navigate to dashboard
+  try { SpreadsheetApp.getActive().setActiveSheet(getSheet_("RESULTS_DASHBOARD")); } catch (e) {}
+}
+
+/**
+ * V2 logger matches your SUBMISSIONS_LOG columns and fills push metadata.
+ * Columns we built earlier:
+ * Timestamp | Student Name | Student Email | Lesson Code | Score | Tier | XP (row) | Claim Code | Pushed? | Master Row ID/Notes | Missed/Validation Notes
+ */
+function appendLocalSubmissionLogV2_(cfg, profile, scored, tier, xp, claimCode, pushed, masterRowId, masterNotes) {
+  let sh;
+  try { sh = getSheet_("SUBMISSIONS_LOG"); } catch (e) { return; }
+
+  const row = [
+    now_(),
+    profile.name,
+    profile.email,
+    cfg["LESSON_CODE"],
+    scored.score,
+    tier,
+    xp,
+    claimCode,
+    pushed ? "TRUE" : "FALSE",
+    masterRowId ? `Row ${masterRowId} · ${masterNotes}` : masterNotes,
+    buildLogNotes_(scored)
+  ];
+  sh.appendRow(row);
+}
+
+function buildFinalAlert_(cfg, profile, scored, tier, xp, claimCode, pushed, masterNotes) {
+  const lines = [
+    `Analyst: ${profile.name}`,
+    `Score: ${scored.score} / ${cfg["TOTAL_POINTS"]}`,
+    `Tier: ${tier}`,
+    `XP Row Value: ${xp}`,
+  ];
+  if (claimCode) lines.push(`Claim Code: ${claimCode}`);
+  lines.push(`Master Push: ${pushed ? "SUCCESS" : "NOT PUSHED"}`);
+  lines.push(`Notes: ${masterNotes}`);
+  lines.push("");
+  lines.push("Your outcome card is on RESULTS_DASHBOARD. Every run is logged in SUBMISSIONS_LOG.");
+  return lines.join("\n");
+}
