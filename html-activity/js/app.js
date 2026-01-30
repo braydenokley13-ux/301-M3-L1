@@ -1,108 +1,115 @@
 /**
- * BOW Track 301 - Structural Leverage SIM
- * Main Application JavaScript
+ * Structural Leverage SIM - Main App
+ * BOW Track 301 - Module 3 Lesson 1
  */
 
 // ============================================
-// Configuration
+// Config
 // ============================================
 const CONFIG = {
-  LESSON_CODE: 'L1-301-M3-LEV',
-  TRACK: 301,
-  MODULE: 3,
-  LESSON_NUM: 1,
+  LESSON_CODE: 'BOW301-M3L1',
   TOTAL_POINTS: 23,
   GOLD_MIN: 21,
   SILVER_MIN: 17,
   BRONZE_MIN: 13,
   GOLD_XP: 150,
   SILVER_XP: 100,
-  BRONZE_XP: 50,
-  FAIL_XP: 0,
-  HASH_SALT: 'BOW'
+  BRONZE_XP: 50
+};
+
+// Universal claim codes - same for everyone at each tier
+const CLAIM_CODES = {
+  GOLD: 'BOW301-M3L1-GOLD-7X9K2',
+  SILVER: 'BOW301-M3L1-SILVER-4M8P1',
+  BRONZE: 'BOW301-M3L1-BRONZE-2N5Q8',
+  FAIL: ''
 };
 
 // ============================================
-// Answer Key
+// Answer Key (NBA Teams)
 // ============================================
 const ANSWER_KEY = {
-  // Phase 1: Initial Leverage Read (3 questions)
-  'p1-harbor': 'Team',
-  'p1-ironclad': 'Player',
-  'p1-summit': 'Balanced',
+  // Phase 1: Initial Leverage Read
+  'p1-lakers': 'Team',      // Deep roster, no outside interest = Team leverage
+  'p1-suns': 'Player',      // Thin roster, strong market interest = Player leverage
+  'p1-nuggets': 'Balanced', // Medium everything = Balanced
 
-  // Phase 2: Leverage Shifts (9 questions)
-  // Update 1 - Deadline Compresses
-  'p2-u1-harbor': 'Stayed the same',
-  'p2-u1-ironclad': 'Shifted toward player',
-  'p2-u1-summit': 'Shifted toward player',
+  // Phase 2: Leverage Shifts
+  // Update 1 - Deadline Approaches
+  'p2-u1-lakers': 'Stayed the same',      // Lakers still have leverage, deadline doesn't change much
+  'p2-u1-suns': 'Shifted toward player',  // Deadline pressure hurts desperate Suns
+  'p2-u1-nuggets': 'Shifted toward player', // Deadline adds slight pressure
 
   // Update 2 - Market Thins
-  'p2-u2-harbor': 'Stayed the same',
-  'p2-u2-ironclad': 'Shifted toward player',
-  'p2-u2-summit': 'Shifted toward player',
+  'p2-u2-lakers': 'Stayed the same',      // Lakers have depth, don't need market
+  'p2-u2-suns': 'Shifted toward player',  // Fewer options = more player leverage
+  'p2-u2-nuggets': 'Shifted toward player', // Harder to replace = player gains
 
-  // Update 3 - External Shock
-  'p2-u3-harbor': 'Shifted toward team',
-  'p2-u3-ironclad': 'Shifted toward player',
-  'p2-u3-summit': 'Shifted toward player',
+  // Update 3 - Injury News (contender needs starter)
+  'p2-u3-lakers': 'Shifted toward team',  // Player might have new option, but Lakers still fine
+  'p2-u3-suns': 'Shifted toward player',  // Player has even more options now
+  'p2-u3-nuggets': 'Shifted toward player', // Player might get better offer elsewhere
 
-  // Phase 3: Drivers (9 questions)
-  'p3-harbor-replace': 'Deep',
-  'p3-harbor-depend': 'Low',
-  'p3-harbor-leverage': 'Team',
-  'p3-ironclad-replace': 'Thin',
-  'p3-ironclad-depend': 'High',
-  'p3-ironclad-leverage': 'Player',
-  'p3-summit-replace': 'Medium',
-  'p3-summit-depend': 'Medium',
-  'p3-summit-leverage': 'Team',
+  // Phase 3: Drivers
+  'p3-lakers-replace': 'Deep',
+  'p3-lakers-depend': 'Low',
+  'p3-lakers-leverage': 'Team',
 
-  // Phase 4: Walk-Away Test (2 questions)
-  'p4-who': 'Team',
-  'p4-consequence': 'Minimal damage'
+  'p3-suns-replace': 'Thin',
+  'p3-suns-depend': 'High',
+  'p3-suns-leverage': 'Player',
+
+  'p3-nuggets-replace': 'Medium',
+  'p3-nuggets-depend': 'Medium',
+  'p3-nuggets-leverage': 'Team', // With serviceable backup, team can walk
+
+  // Phase 4: Walk-Away Test (Nuggets)
+  'p4-who': 'Team',           // Nuggets can walk - they have a backup
+  'p4-consequence': 'Minimal damage' // Performance drops but manageable
 };
 
-// Questions grouped by phase for breakdown
-const PHASE_QUESTIONS = {
-  phase1: ['p1-harbor', 'p1-ironclad', 'p1-summit'],
+// Question groups by phase
+const PHASES = {
+  phase1: ['p1-lakers', 'p1-suns', 'p1-nuggets'],
   phase2: [
-    'p2-u1-harbor', 'p2-u1-ironclad', 'p2-u1-summit',
-    'p2-u2-harbor', 'p2-u2-ironclad', 'p2-u2-summit',
-    'p2-u3-harbor', 'p2-u3-ironclad', 'p2-u3-summit'
+    'p2-u1-lakers', 'p2-u1-suns', 'p2-u1-nuggets',
+    'p2-u2-lakers', 'p2-u2-suns', 'p2-u2-nuggets',
+    'p2-u3-lakers', 'p2-u3-suns', 'p2-u3-nuggets'
   ],
   phase3: [
-    'p3-harbor-replace', 'p3-harbor-depend', 'p3-harbor-leverage',
-    'p3-ironclad-replace', 'p3-ironclad-depend', 'p3-ironclad-leverage',
-    'p3-summit-replace', 'p3-summit-depend', 'p3-summit-leverage'
+    'p3-lakers-replace', 'p3-lakers-depend', 'p3-lakers-leverage',
+    'p3-suns-replace', 'p3-suns-depend', 'p3-suns-leverage',
+    'p3-nuggets-replace', 'p3-nuggets-depend', 'p3-nuggets-leverage'
   ],
   phase4: ['p4-who', 'p4-consequence']
 };
 
 // ============================================
-// State Management
+// State
 // ============================================
 let state = {
-  currentPhase: 'intro',
-  student: {
-    name: '',
-    email: ''
-  },
+  phase: 'intro',
+  student: { name: '', email: '' },
   answers: {},
   score: 0,
   tier: '',
   claimCode: ''
 };
 
-// Load state from localStorage
+// ============================================
+// Storage
+// ============================================
+function saveState() {
+  localStorage.setItem('bow-leverage-sim', JSON.stringify(state));
+}
+
 function loadState() {
-  const saved = localStorage.getItem('bow-sim-state');
+  const saved = localStorage.getItem('bow-leverage-sim');
   if (saved) {
     try {
-      const parsed = JSON.parse(saved);
-      state = { ...state, ...parsed };
+      state = { ...state, ...JSON.parse(saved) };
 
-      // Restore student info
+      // Restore form
       if (state.student.name) {
         document.getElementById('studentName').value = state.student.name;
       }
@@ -110,299 +117,202 @@ function loadState() {
         document.getElementById('studentEmail').value = state.student.email;
       }
 
-      // Restore answers
-      Object.entries(state.answers).forEach(([questionId, value]) => {
-        const optionGroup = document.querySelector(`[data-question="${questionId}"]`);
-        if (optionGroup) {
-          const btn = optionGroup.querySelector(`[data-value="${value}"]`);
-          if (btn) {
-            btn.classList.add('selected');
-          }
+      // Restore selections
+      Object.entries(state.answers).forEach(([q, v]) => {
+        const group = document.querySelector(`[data-question="${q}"]`);
+        if (group) {
+          const btn = group.querySelector(`[data-value="${v}"]`);
+          if (btn) btn.classList.add('selected');
         }
       });
 
-      // Update navigation buttons
-      updateNavButtons();
+      updateButtons();
     } catch (e) {
-      console.error('Error loading state:', e);
+      console.error('Load error:', e);
     }
   }
 }
 
-// Save state to localStorage
-function saveState() {
-  localStorage.setItem('bow-sim-state', JSON.stringify(state));
-}
-
 // ============================================
-// Phase Navigation
+// Navigation
 // ============================================
-const phases = ['intro', '1', '2', '3', '4', 'results'];
+const SCREENS = ['intro', '1', '2', '3', '4', 'results'];
 
-function navigateToPhase(phase) {
-  // Hide all phases
-  document.querySelectorAll('.phase-section').forEach(section => {
-    section.classList.remove('active');
-  });
+function goTo(screen) {
+  // Hide all
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
-  // Show target phase
-  const targetSection = document.getElementById(`phase-${phase}`);
-  if (targetSection) {
-    targetSection.classList.add('active');
-  }
+  // Show target
+  const el = document.getElementById(`phase-${screen}`);
+  if (el) el.classList.add('active');
 
-  // Update progress indicators
-  document.querySelectorAll('.phase-indicator').forEach(indicator => {
-    const indicatorPhase = indicator.dataset.phase;
-    indicator.classList.remove('active', 'completed');
+  // Update nav steps
+  document.querySelectorAll('.step').forEach(step => {
+    const p = step.dataset.phase;
+    step.classList.remove('active', 'done');
 
-    if (indicatorPhase === phase) {
-      indicator.classList.add('active');
-    } else if (phases.indexOf(indicatorPhase) < phases.indexOf(phase)) {
-      indicator.classList.add('completed');
+    if (p === screen) {
+      step.classList.add('active');
+    } else if (SCREENS.indexOf(p) < SCREENS.indexOf(screen)) {
+      step.classList.add('done');
     }
   });
 
   // Update progress bar
-  const progress = (phases.indexOf(phase) / (phases.length - 1)) * 100;
-  document.getElementById('progressFill').style.width = `${progress}%`;
+  const pct = (SCREENS.indexOf(screen) / (SCREENS.length - 1)) * 100;
+  document.getElementById('progressFill').style.width = `${pct}%`;
 
-  // Update state
-  state.currentPhase = phase;
+  state.phase = screen;
   saveState();
 
-  // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ============================================
-// Answer Selection
+// Options
 // ============================================
-function initAnswerOptions() {
-  document.querySelectorAll('.answer-options').forEach(optionGroup => {
-    const questionId = optionGroup.dataset.question;
+function initOptions() {
+  document.querySelectorAll('.options').forEach(group => {
+    const q = group.dataset.question;
 
-    optionGroup.querySelectorAll('.option-btn').forEach(btn => {
+    group.querySelectorAll('.opt').forEach(btn => {
       btn.addEventListener('click', () => {
-        // Remove selected from siblings
-        optionGroup.querySelectorAll('.option-btn').forEach(b => {
-          b.classList.remove('selected');
-        });
+        // Deselect siblings
+        group.querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
 
-        // Add selected to clicked
+        // Select this
         btn.classList.add('selected');
 
-        // Save answer
-        state.answers[questionId] = btn.dataset.value;
+        // Save
+        state.answers[q] = btn.dataset.value;
         saveState();
-
-        // Update navigation buttons
-        updateNavButtons();
+        updateButtons();
       });
     });
   });
 }
 
-function updateNavButtons() {
-  // Phase 1 -> 2
-  const phase1Complete = PHASE_QUESTIONS.phase1.every(q => state.answers[q]);
-  const toPhase2Btn = document.getElementById('toPhase2');
-  if (toPhase2Btn) toPhase2Btn.disabled = !phase1Complete;
+function updateButtons() {
+  const p1Done = PHASES.phase1.every(q => state.answers[q]);
+  const p2Done = PHASES.phase2.every(q => state.answers[q]);
+  const p3Done = PHASES.phase3.every(q => state.answers[q]);
+  const p4Done = PHASES.phase4.every(q => state.answers[q]);
 
-  // Phase 2 -> 3
-  const phase2Complete = PHASE_QUESTIONS.phase2.every(q => state.answers[q]);
-  const toPhase3Btn = document.getElementById('toPhase3');
-  if (toPhase3Btn) toPhase3Btn.disabled = !phase2Complete;
+  const btn2 = document.getElementById('toPhase2');
+  const btn3 = document.getElementById('toPhase3');
+  const btn4 = document.getElementById('toPhase4');
+  const btnSubmit = document.getElementById('submitSim');
 
-  // Phase 3 -> 4
-  const phase3Complete = PHASE_QUESTIONS.phase3.every(q => state.answers[q]);
-  const toPhase4Btn = document.getElementById('toPhase4');
-  if (toPhase4Btn) toPhase4Btn.disabled = !phase3Complete;
-
-  // Phase 4 -> Results
-  const phase4Complete = PHASE_QUESTIONS.phase4.every(q => state.answers[q]);
-  const submitBtn = document.getElementById('submitSim');
-  if (submitBtn) submitBtn.disabled = !phase4Complete;
+  if (btn2) btn2.disabled = !p1Done;
+  if (btn3) btn3.disabled = !p2Done;
+  if (btn4) btn4.disabled = !p3Done;
+  if (btnSubmit) btnSubmit.disabled = !p4Done;
 }
 
 // ============================================
-// Scoring Engine
+// Scoring
 // ============================================
-function calculateScore() {
+function score() {
   let correct = 0;
   const results = {};
 
-  Object.keys(ANSWER_KEY).forEach(questionId => {
-    const userAnswer = state.answers[questionId];
-    const correctAnswer = ANSWER_KEY[questionId];
-    const isCorrect = userAnswer === correctAnswer;
-
-    if (isCorrect) correct++;
-
-    results[questionId] = {
-      user: userAnswer,
-      correct: correctAnswer,
-      isCorrect
-    };
+  Object.keys(ANSWER_KEY).forEach(q => {
+    const user = state.answers[q];
+    const answer = ANSWER_KEY[q];
+    const ok = user === answer;
+    if (ok) correct++;
+    results[q] = { user, answer, ok };
   });
 
-  return {
-    score: correct,
-    total: CONFIG.TOTAL_POINTS,
-    results
-  };
+  return { score: correct, results };
 }
 
-function getTier(score) {
-  if (score >= CONFIG.GOLD_MIN) return 'GOLD';
-  if (score >= CONFIG.SILVER_MIN) return 'SILVER';
-  if (score >= CONFIG.BRONZE_MIN) return 'BRONZE';
+function getTier(s) {
+  if (s >= CONFIG.GOLD_MIN) return 'GOLD';
+  if (s >= CONFIG.SILVER_MIN) return 'SILVER';
+  if (s >= CONFIG.BRONZE_MIN) return 'BRONZE';
   return 'FAIL';
 }
 
 function getXP(tier) {
-  switch (tier) {
-    case 'GOLD': return CONFIG.GOLD_XP;
-    case 'SILVER': return CONFIG.SILVER_XP;
-    case 'BRONZE': return CONFIG.BRONZE_XP;
-    default: return CONFIG.FAIL_XP;
-  }
+  if (tier === 'GOLD') return CONFIG.GOLD_XP;
+  if (tier === 'SILVER') return CONFIG.SILVER_XP;
+  if (tier === 'BRONZE') return CONFIG.BRONZE_XP;
+  return 0;
 }
 
 // ============================================
-// Claim Code Generator
+// Results
 // ============================================
-function makeInitials(name) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return 'XX';
-
-  const first = parts[0][0] || 'X';
-  const last = parts.length === 1
-    ? parts[0][parts[0].length - 1]
-    : parts[parts.length - 1][0] || 'X';
-
-  return (first + last).toUpperCase();
-}
-
-async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray;
-}
-
-async function hash6(input) {
-  const bytes = await sha256(input);
-
-  // Convert first 4 bytes to number
-  let num = 0;
-  for (let i = 0; i < 4; i++) {
-    num = (num << 8) + (bytes[i] & 0xff);
-  }
-
-  // Convert to base36 and take first 6 chars
-  const out = Math.abs(num).toString(36).toUpperCase();
-  return out.padStart(6, '0').slice(0, 6);
-}
-
-async function generateClaimCode(tier, name, email) {
-  if (tier === 'FAIL') return '';
-
-  const initials = makeInitials(name);
-  const input = `${email.toLowerCase()}|${CONFIG.LESSON_CODE}|${tier}|${CONFIG.HASH_SALT}`;
-  const hashValue = await hash6(input);
-
-  return `${CONFIG.LESSON_CODE}-${tier}-${initials}-${hashValue}`;
-}
-
-// ============================================
-// Results Display
-// ============================================
-async function showResults() {
-  const { score, total, results } = calculateScore();
-  const tier = getTier(score);
+function showResults() {
+  const { score: s, results } = score();
+  const tier = getTier(s);
   const xp = getXP(tier);
-  const claimCode = await generateClaimCode(tier, state.student.name, state.student.email);
+  const code = CLAIM_CODES[tier];
 
-  // Update state
-  state.score = score;
+  state.score = s;
   state.tier = tier;
-  state.claimCode = claimCode;
+  state.claimCode = code;
   saveState();
 
-  // Update analyst info
+  // Update UI
   document.getElementById('analystInfo').textContent =
-    `Analyst: ${state.student.name}  |  ${state.student.email}`;
+    `${state.student.name} • ${state.student.email}`;
 
-  // Update score
-  document.getElementById('scoreValue').textContent = score;
+  document.getElementById('scoreValue').textContent = s;
 
-  // Update tier
   const tierBox = document.getElementById('tierBox');
-  tierBox.className = 'tier-box ' + tier.toLowerCase();
+  tierBox.className = 'tier-card ' + tier.toLowerCase();
   document.getElementById('tierValue').textContent = tier === 'FAIL' ? 'NOT YET' : tier;
   document.getElementById('xpValue').textContent = `${xp} XP`;
 
-  // Update claim code
-  document.getElementById('claimCode').textContent = claimCode || 'NO CLAIM CODE — RUN SIM AGAIN';
+  document.getElementById('claimCode').textContent = code || 'Complete the simulation to earn a code';
 
-  // Generate breakdown
-  generateBreakdown(results);
+  // Breakdown
+  buildBreakdown(results);
 
-  // Navigate to results
-  navigateToPhase('results');
-
-  // Show confetti for Gold
-  if (tier === 'GOLD') {
-    showConfetti();
-  }
+  goTo('results');
 }
 
-function generateBreakdown(results) {
-  const breakdown = document.getElementById('resultsBreakdown');
-  breakdown.innerHTML = '';
+function buildBreakdown(results) {
+  const el = document.getElementById('resultsBreakdown');
+  el.innerHTML = '';
 
-  const phaseNames = {
-    phase1: 'Phase 1: Initial Leverage Read',
+  const names = {
+    phase1: 'Phase 1: Initial Read',
     phase2: 'Phase 2: Leverage Shifts',
     phase3: 'Phase 3: Drivers',
-    phase4: 'Phase 4: Walk-Away Test'
+    phase4: 'Phase 4: Walk-Away'
   };
 
-  Object.entries(PHASE_QUESTIONS).forEach(([phase, questions]) => {
+  Object.entries(PHASES).forEach(([phase, questions]) => {
     const phaseResults = questions.map(q => results[q]);
-    const phaseCorrect = phaseResults.filter(r => r.isCorrect).length;
-    const phaseTotal = questions.length;
+    const correct = phaseResults.filter(r => r.ok).length;
+    const total = questions.length;
+    const perfect = correct === total;
 
-    const phaseDiv = document.createElement('div');
-    phaseDiv.className = 'breakdown-phase';
-
-    const isPerfect = phaseCorrect === phaseTotal;
-
-    phaseDiv.innerHTML = `
-      <div class="breakdown-header">
-        <span>${phaseNames[phase]}</span>
-        <span class="breakdown-score ${isPerfect ? 'perfect' : ''}">${phaseCorrect}/${phaseTotal}</span>
-      </div>
+    const div = document.createElement('div');
+    div.className = 'breakdown-phase';
+    div.innerHTML = `
+      <span>${names[phase]}</span>
+      <span class="breakdown-score ${perfect ? 'perfect' : ''}">${correct}/${total}</span>
     `;
-
-    breakdown.appendChild(phaseDiv);
+    el.appendChild(div);
   });
 }
 
 // ============================================
 // Review Mode
 // ============================================
-function showReviewMode() {
-  // Mark correct/incorrect answers
-  Object.entries(ANSWER_KEY).forEach(([questionId, correctAnswer]) => {
-    const optionGroup = document.querySelector(`[data-question="${questionId}"]`);
-    if (!optionGroup) return;
+function showReview() {
+  Object.entries(ANSWER_KEY).forEach(([q, correct]) => {
+    const group = document.querySelector(`[data-question="${q}"]`);
+    if (!group) return;
 
-    optionGroup.querySelectorAll('.option-btn').forEach(btn => {
+    group.querySelectorAll('.opt').forEach(btn => {
       btn.classList.remove('correct', 'incorrect');
 
-      if (btn.dataset.value === correctAnswer) {
+      if (btn.dataset.value === correct) {
         btn.classList.add('correct');
       } else if (btn.classList.contains('selected')) {
         btn.classList.add('incorrect');
@@ -410,19 +320,17 @@ function showReviewMode() {
     });
   });
 
-  // Navigate to Phase 1
-  navigateToPhase('1');
-  showToast('Review mode: Green = correct, Red = your incorrect answers');
+  goTo('1');
+  toast('Review mode: Green = correct, Red = incorrect');
 }
 
 // ============================================
-// Restart
+// Reset
 // ============================================
-function restartSim() {
-  // Clear state
+function reset() {
   state = {
-    currentPhase: 'intro',
-    student: state.student, // Keep student info
+    phase: 'intro',
+    student: state.student,
     answers: {},
     score: 0,
     tier: '',
@@ -430,103 +338,45 @@ function restartSim() {
   };
   saveState();
 
-  // Clear UI selections
-  document.querySelectorAll('.option-btn').forEach(btn => {
+  document.querySelectorAll('.opt').forEach(btn => {
     btn.classList.remove('selected', 'correct', 'incorrect');
   });
 
-  // Reset nav buttons
-  updateNavButtons();
-
-  // Go to intro
-  navigateToPhase('intro');
-
-  showToast('Simulation reset. Good luck!');
+  updateButtons();
+  goTo('intro');
+  toast('Simulation reset');
 }
 
 // ============================================
-// Toast Notifications
+// Toast
 // ============================================
-function showToast(message, duration = 3000) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
+function toast(msg, duration = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
 
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, duration);
+  setTimeout(() => el.classList.remove('show'), duration);
 }
 
 // ============================================
-// Copy to Clipboard
+// Copy
 // ============================================
-function copyClaimCode() {
+function copyCode() {
   const code = state.claimCode;
   if (!code) return;
 
   navigator.clipboard.writeText(code).then(() => {
-    showToast('Claim code copied to clipboard!');
+    toast('Copied!');
   }).catch(() => {
-    // Fallback for older browsers
-    const textarea = document.createElement('textarea');
-    textarea.value = code;
-    document.body.appendChild(textarea);
-    textarea.select();
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
     document.execCommand('copy');
-    document.body.removeChild(textarea);
-    showToast('Claim code copied to clipboard!');
+    document.body.removeChild(ta);
+    toast('Copied!');
   });
-}
-
-// ============================================
-// Confetti Effect
-// ============================================
-function showConfetti() {
-  const container = document.createElement('div');
-  container.className = 'confetti-container';
-  document.body.appendChild(container);
-
-  const colors = ['#B45309', '#FCD34D', '#F59E0B', '#FBBF24', '#D97706'];
-
-  for (let i = 0; i < 100; i++) {
-    const confetti = document.createElement('div');
-    confetti.style.cssText = `
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: ${colors[Math.floor(Math.random() * colors.length)]};
-      left: ${Math.random() * 100}%;
-      top: -10px;
-      border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
-      animation: confetti-fall ${2 + Math.random() * 2}s linear forwards;
-      animation-delay: ${Math.random() * 0.5}s;
-    `;
-    container.appendChild(confetti);
-  }
-
-  // Add animation keyframes
-  if (!document.getElementById('confetti-styles')) {
-    const style = document.createElement('style');
-    style.id = 'confetti-styles';
-    style.textContent = `
-      @keyframes confetti-fall {
-        0% {
-          transform: translateY(0) rotate(0deg);
-          opacity: 1;
-        }
-        100% {
-          transform: translateY(100vh) rotate(720deg);
-          opacity: 0;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  // Remove after animation
-  setTimeout(() => {
-    container.remove();
-  }, 5000);
 }
 
 // ============================================
@@ -537,133 +387,68 @@ function validateIdentity() {
   const email = document.getElementById('studentEmail').value.trim();
 
   if (!name) {
-    showToast('Please enter your full name');
+    toast('Please enter your name');
     document.getElementById('studentName').focus();
     return false;
   }
 
-  if (!email || !email.includes('@') || !email.includes('.')) {
-    showToast('Please enter a valid email address');
+  if (!email || !email.includes('@')) {
+    toast('Please enter a valid email');
     document.getElementById('studentEmail').focus();
     return false;
   }
 
-  state.student.name = name;
-  state.student.email = email;
+  state.student = { name, email };
   saveState();
-
   return true;
 }
 
 // ============================================
 // Event Listeners
 // ============================================
-function initEventListeners() {
-  // Start button
+function initEvents() {
+  // Start
   document.getElementById('startSim').addEventListener('click', () => {
-    if (validateIdentity()) {
-      navigateToPhase('1');
-    }
+    if (validateIdentity()) goTo('1');
   });
 
-  // Back to intro
-  document.getElementById('backToIntro').addEventListener('click', () => {
-    navigateToPhase('intro');
-  });
-
-  // Phase 1 -> 2
-  document.getElementById('toPhase2').addEventListener('click', () => {
-    navigateToPhase('2');
-  });
-
-  // Phase 2 -> 1
-  document.getElementById('backToPhase1').addEventListener('click', () => {
-    navigateToPhase('1');
-  });
-
-  // Phase 2 -> 3
-  document.getElementById('toPhase3').addEventListener('click', () => {
-    navigateToPhase('3');
-  });
-
-  // Phase 3 -> 2
-  document.getElementById('backToPhase2').addEventListener('click', () => {
-    navigateToPhase('2');
-  });
-
-  // Phase 3 -> 4
-  document.getElementById('toPhase4').addEventListener('click', () => {
-    navigateToPhase('4');
-  });
-
-  // Phase 4 -> 3
-  document.getElementById('backToPhase3').addEventListener('click', () => {
-    navigateToPhase('3');
-  });
+  // Navigation
+  document.getElementById('backToIntro').addEventListener('click', () => goTo('intro'));
+  document.getElementById('toPhase2').addEventListener('click', () => goTo('2'));
+  document.getElementById('backToPhase1').addEventListener('click', () => goTo('1'));
+  document.getElementById('toPhase3').addEventListener('click', () => goTo('3'));
+  document.getElementById('backToPhase2').addEventListener('click', () => goTo('2'));
+  document.getElementById('toPhase4').addEventListener('click', () => goTo('4'));
+  document.getElementById('backToPhase3').addEventListener('click', () => goTo('3'));
 
   // Submit
-  document.getElementById('submitSim').addEventListener('click', () => {
-    showResults();
-  });
+  document.getElementById('submitSim').addEventListener('click', showResults);
 
-  // Review answers
-  document.getElementById('reviewAnswers').addEventListener('click', () => {
-    showReviewMode();
-  });
-
-  // Restart
+  // Results actions
+  document.getElementById('reviewAnswers').addEventListener('click', showReview);
   document.getElementById('restartSim').addEventListener('click', () => {
-    if (confirm('Are you sure you want to reset the simulation? Your answers will be cleared.')) {
-      restartSim();
-    }
+    if (confirm('Reset the simulation?')) reset();
   });
 
-  // Copy claim code
-  document.getElementById('copyCode').addEventListener('click', () => {
-    copyClaimCode();
+  // Copy
+  document.getElementById('copyCode').addEventListener('click', copyCode);
+
+  // Enter key on inputs
+  document.getElementById('studentName').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('studentEmail').focus();
   });
 
-  // Enter key on form inputs
-  document.getElementById('studentName').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      document.getElementById('studentEmail').focus();
-    }
-  });
-
-  document.getElementById('studentEmail').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      document.getElementById('startSim').click();
-    }
+  document.getElementById('studentEmail').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('startSim').click();
   });
 }
 
 // ============================================
-// Keyboard Navigation
-// ============================================
-function initKeyboardNav() {
-  document.addEventListener('keydown', (e) => {
-    // Escape to go back
-    if (e.key === 'Escape') {
-      const currentIndex = phases.indexOf(state.currentPhase);
-      if (currentIndex > 0 && state.currentPhase !== 'results') {
-        navigateToPhase(phases[currentIndex - 1]);
-      }
-    }
-  });
-}
-
-// ============================================
-// Initialize
+// Init
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-  initAnswerOptions();
-  initEventListeners();
-  initKeyboardNav();
+  initOptions();
+  initEvents();
   loadState();
-  updateNavButtons();
-
-  // If returning to a session, show toast
-  if (Object.keys(state.answers).length > 0 && state.currentPhase === 'intro') {
-    showToast('Welcome back! Your progress has been saved.');
-  }
+  updateButtons();
 });

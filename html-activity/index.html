@@ -3,381 +3,404 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BOW Track 301 - Structural Leverage SIM</title>
+  <title>Structural Leverage SIM | BOW Track 301</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Progress Bar -->
-  <div class="progress-bar">
-    <div class="progress-fill" id="progressFill"></div>
-  </div>
-
-  <!-- Header -->
-  <header class="header">
-    <div class="header-content">
-      <div class="header-brand">
-        <span class="header-track">BOW · TRACK 301</span>
-        <h1 class="header-title">Structural Leverage SIM</h1>
-      </div>
-      <div class="header-progress" id="headerProgress">
-        <span class="phase-indicator" data-phase="intro">Start</span>
-        <span class="phase-indicator" data-phase="1">P1</span>
-        <span class="phase-indicator" data-phase="2">P2</span>
-        <span class="phase-indicator" data-phase="3">P3</span>
-        <span class="phase-indicator" data-phase="4">P4</span>
-        <span class="phase-indicator" data-phase="results">Results</span>
-      </div>
+  <div class="app">
+    <!-- Progress -->
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
     </div>
-  </header>
 
-  <main class="main-content">
-    <!-- INTRO SCREEN -->
-    <section class="phase-section active" id="phase-intro">
-      <div class="container">
-        <div class="intro-card">
-          <div class="mission-badge">MISSION BRIEFING</div>
-          <h2 class="intro-title">Structural Leverage Lab</h2>
-          <p class="intro-subtitle">Leverage is alternatives, not arguments.</p>
+    <!-- Nav -->
+    <nav class="nav">
+      <div class="nav-brand">
+        <span class="nav-tag">BOW 301</span>
+        <span class="nav-title">Structural Leverage</span>
+      </div>
+      <div class="nav-steps">
+        <span class="step active" data-phase="intro">Start</span>
+        <span class="step" data-phase="1">1</span>
+        <span class="step" data-phase="2">2</span>
+        <span class="step" data-phase="3">3</span>
+        <span class="step" data-phase="4">4</span>
+        <span class="step" data-phase="results">Done</span>
+      </div>
+    </nav>
 
-          <div class="intro-content">
-            <p>In this lab, you will analyze contract negotiations across the fictional <strong>Northshore League</strong>.</p>
-            <p>You are <strong>NOT</strong> being asked to propose a deal, judge fairness, or guess salaries.</p>
-            <p>Your job is to identify <strong>where leverage lives</strong> — and how it shifts as the environment changes.</p>
+    <!-- INTRO -->
+    <section class="screen active" id="phase-intro">
+      <div class="wrap">
+        <div class="intro">
+          <div class="intro-badge">NBA Free Agency Simulation</div>
+          <h1>Structural Leverage Lab</h1>
+          <p class="intro-tagline">Leverage is alternatives, not arguments.</p>
+
+          <div class="intro-brief">
+            <p>You'll analyze <strong>three real NBA contract negotiations</strong> during the 2024 offseason.</p>
+            <p>Your job: identify <strong>where leverage lives</strong> and how it shifts as conditions change.</p>
           </div>
 
-          <div class="phase-overview">
-            <h3>Your Mission</h3>
-            <div class="phase-list">
-              <div class="phase-item">
-                <span class="phase-num">1</span>
-                <span class="phase-desc">Identify leverage holder</span>
-              </div>
-              <div class="phase-item">
-                <span class="phase-num">2</span>
-                <span class="phase-desc">Track shifts under updates</span>
-              </div>
-              <div class="phase-item">
-                <span class="phase-num">3</span>
-                <span class="phase-desc">Diagnose drivers (replaceability × dependence)</span>
-              </div>
-              <div class="phase-item">
-                <span class="phase-num">4</span>
-                <span class="phase-desc">Walk-away test</span>
-              </div>
+          <div class="mission-steps">
+            <div class="mission-step">
+              <div class="mission-num">1</div>
+              <div class="mission-text">Read the initial leverage</div>
+            </div>
+            <div class="mission-step">
+              <div class="mission-num">2</div>
+              <div class="mission-text">Track shifts as news breaks</div>
+            </div>
+            <div class="mission-step">
+              <div class="mission-num">3</div>
+              <div class="mission-text">Diagnose the drivers</div>
+            </div>
+            <div class="mission-step">
+              <div class="mission-num">4</div>
+              <div class="mission-text">Run the walk-away test</div>
             </div>
           </div>
 
-          <div class="identity-form">
-            <h3>Analyst Identity</h3>
-            <div class="form-group">
-              <label for="studentName">Full Name</label>
-              <input type="text" id="studentName" placeholder="Enter your full name" required>
-            </div>
-            <div class="form-group">
-              <label for="studentEmail">Email</label>
-              <input type="email" id="studentEmail" placeholder="Enter your email" required>
+          <div class="identity-section">
+            <h3>Enter Your Info</h3>
+            <div class="input-row">
+              <input type="text" id="studentName" placeholder="Full Name" required>
+              <input type="email" id="studentEmail" placeholder="Email" required>
             </div>
           </div>
 
-          <button class="btn btn-primary btn-large" id="startSim">
-            Begin Simulation
-            <span class="btn-arrow">→</span>
+          <button class="btn-primary" id="startSim">
+            Start Simulation
           </button>
         </div>
       </div>
     </section>
 
-    <!-- PHASE 1: Initial Leverage Read -->
-    <section class="phase-section" id="phase-1">
-      <div class="container">
-        <div class="phase-header">
-          <span class="phase-badge">Phase 1</span>
+    <!-- PHASE 1 -->
+    <section class="screen" id="phase-1">
+      <div class="wrap">
+        <div class="phase-head">
+          <span class="phase-tag">Phase 1 of 4</span>
           <h2>Initial Leverage Read</h2>
-          <p class="phase-instruction">Identify who has leverage right now (Team / Player / Balanced).</p>
+          <p>Who has leverage in each negotiation right now?</p>
         </div>
 
-        <!-- Harbor City -->
-        <div class="team-card" data-team="harbor">
-          <div class="team-header harbor">
-            <h3 class="team-name">Harbor City</h3>
-          </div>
-          <div class="team-body">
-            <div class="context-grid">
-              <div class="context-section">
-                <h4>Team Context</h4>
-                <ul class="context-list">
-                  <li><span class="context-label">Depth at position:</span> <span class="context-value positive">Deep</span></li>
-                  <li><span class="context-label">Cap flexibility:</span> <span class="context-value positive">High</span></li>
-                  <li><span class="context-label">Competitive urgency:</span> <span class="context-value neutral">Low</span></li>
-                </ul>
-              </div>
-              <div class="context-section">
-                <h4>Player Context</h4>
-                <ul class="context-list">
-                  <li><span class="context-label">Role:</span> <span class="context-value">Starter-level</span></li>
-                  <li><span class="context-label">Outside interest:</span> <span class="context-value negative">None</span></li>
-                </ul>
-              </div>
-              <div class="context-section">
-                <h4>Timing</h4>
-                <ul class="context-list">
-                  <li><span class="context-label">Season stage:</span> <span class="context-value">Early</span></li>
-                </ul>
-              </div>
-            </div>
-            <div class="question-box">
-              <label class="question-label">Who has leverage?</label>
-              <div class="answer-options" data-question="p1-harbor">
-                <button class="option-btn" data-value="Team">Team</button>
-                <button class="option-btn" data-value="Player">Player</button>
-                <button class="option-btn" data-value="Balanced">Balanced</button>
-              </div>
+        <!-- Lakers -->
+        <div class="team-card lakers">
+          <div class="team-top">
+            <div class="team-logo">LAL</div>
+            <div class="team-info">
+              <h3>Los Angeles Lakers</h3>
+              <span class="team-situation">Negotiating with a starting wing</span>
             </div>
           </div>
-        </div>
-
-        <!-- Ironclad -->
-        <div class="team-card" data-team="ironclad">
-          <div class="team-header ironclad">
-            <h3 class="team-name">Ironclad</h3>
-          </div>
-          <div class="team-body">
-            <div class="context-grid">
-              <div class="context-section">
-                <h4>Team Context</h4>
-                <ul class="context-list">
-                  <li><span class="context-label">Depth at position:</span> <span class="context-value negative">Thin (no viable replacement)</span></li>
-                  <li><span class="context-label">Cap flexibility:</span> <span class="context-value neutral">Medium</span></li>
-                  <li><span class="context-label">Competitive urgency:</span> <span class="context-value negative">High</span></li>
-                </ul>
+          <div class="team-context">
+            <div class="context-col">
+              <h4>Team Situation</h4>
+              <div class="context-item">
+                <span class="label">Roster Depth</span>
+                <span class="value good">Deep — multiple options at position</span>
               </div>
-              <div class="context-section">
-                <h4>Player Context</h4>
-                <ul class="context-list">
-                  <li><span class="context-label">Role:</span> <span class="context-value">Starter-level</span></li>
-                  <li><span class="context-label">Outside interest:</span> <span class="context-value positive">Strong (2 teams monitoring)</span></li>
-                </ul>
+              <div class="context-item">
+                <span class="label">Cap Space</span>
+                <span class="value good">$18M under luxury tax</span>
               </div>
-              <div class="context-section">
-                <h4>Timing</h4>
-                <ul class="context-list">
-                  <li><span class="context-label">Season stage:</span> <span class="context-value">Mid</span></li>
-                </ul>
+              <div class="context-item">
+                <span class="label">Urgency</span>
+                <span class="value neutral">Low — competitive but not desperate</span>
               </div>
             </div>
-            <div class="question-box">
-              <label class="question-label">Who has leverage?</label>
-              <div class="answer-options" data-question="p1-ironclad">
-                <button class="option-btn" data-value="Team">Team</button>
-                <button class="option-btn" data-value="Player">Player</button>
-                <button class="option-btn" data-value="Balanced">Balanced</button>
+            <div class="context-col">
+              <h4>Player Situation</h4>
+              <div class="context-item">
+                <span class="label">Role</span>
+                <span class="value">Solid starter, not a star</span>
               </div>
+              <div class="context-item">
+                <span class="label">Market Interest</span>
+                <span class="value bad">None — no other teams calling</span>
+              </div>
+              <div class="context-item">
+                <span class="label">Timeline</span>
+                <span class="value">Early free agency</span>
+              </div>
+            </div>
+          </div>
+          <div class="team-question">
+            <span class="q-label">Who has leverage?</span>
+            <div class="options" data-question="p1-lakers">
+              <button class="opt" data-value="Team">Team</button>
+              <button class="opt" data-value="Player">Player</button>
+              <button class="opt" data-value="Balanced">Balanced</button>
             </div>
           </div>
         </div>
 
-        <!-- Summit -->
-        <div class="team-card" data-team="summit">
-          <div class="team-header summit">
-            <h3 class="team-name">Summit</h3>
+        <!-- Suns -->
+        <div class="team-card suns">
+          <div class="team-top">
+            <div class="team-logo">PHX</div>
+            <div class="team-info">
+              <h3>Phoenix Suns</h3>
+              <span class="team-situation">Negotiating with their starting point guard</span>
+            </div>
           </div>
-          <div class="team-body">
-            <div class="context-grid">
-              <div class="context-section">
-                <h4>Team Context</h4>
-                <ul class="context-list">
-                  <li><span class="context-label">Depth at position:</span> <span class="context-value neutral">Medium (serviceable backup)</span></li>
-                  <li><span class="context-label">Cap flexibility:</span> <span class="context-value neutral">Medium</span></li>
-                  <li><span class="context-label">Competitive urgency:</span> <span class="context-value neutral">Medium</span></li>
-                </ul>
+          <div class="team-context">
+            <div class="context-col">
+              <h4>Team Situation</h4>
+              <div class="context-item">
+                <span class="label">Roster Depth</span>
+                <span class="value bad">Thin — no viable replacement on roster</span>
               </div>
-              <div class="context-section">
-                <h4>Player Context</h4>
-                <ul class="context-list">
-                  <li><span class="context-label">Role:</span> <span class="context-value">Starter-level</span></li>
-                  <li><span class="context-label">Outside interest:</span> <span class="context-value neutral">Limited</span></li>
-                </ul>
+              <div class="context-item">
+                <span class="label">Cap Space</span>
+                <span class="value neutral">$8M available (limited)</span>
               </div>
-              <div class="context-section">
-                <h4>Timing</h4>
-                <ul class="context-list">
-                  <li><span class="context-label">Season stage:</span> <span class="context-value">Mid</span></li>
-                </ul>
+              <div class="context-item">
+                <span class="label">Urgency</span>
+                <span class="value bad">High — championship window closing</span>
               </div>
             </div>
-            <div class="question-box">
-              <label class="question-label">Who has leverage?</label>
-              <div class="answer-options" data-question="p1-summit">
-                <button class="option-btn" data-value="Team">Team</button>
-                <button class="option-btn" data-value="Player">Player</button>
-                <button class="option-btn" data-value="Balanced">Balanced</button>
+            <div class="context-col">
+              <h4>Player Situation</h4>
+              <div class="context-item">
+                <span class="label">Role</span>
+                <span class="value">Starting PG, key piece</span>
               </div>
+              <div class="context-item">
+                <span class="label">Market Interest</span>
+                <span class="value good">Strong — Heat & Rockets interested</span>
+              </div>
+              <div class="context-item">
+                <span class="label">Timeline</span>
+                <span class="value">Mid free agency</span>
+              </div>
+            </div>
+          </div>
+          <div class="team-question">
+            <span class="q-label">Who has leverage?</span>
+            <div class="options" data-question="p1-suns">
+              <button class="opt" data-value="Team">Team</button>
+              <button class="opt" data-value="Player">Player</button>
+              <button class="opt" data-value="Balanced">Balanced</button>
             </div>
           </div>
         </div>
 
-        <div class="phase-nav">
-          <button class="btn btn-secondary" id="backToIntro">← Back</button>
-          <button class="btn btn-primary" id="toPhase2" disabled>Continue to Phase 2 →</button>
+        <!-- Nuggets -->
+        <div class="team-card nuggets">
+          <div class="team-top">
+            <div class="team-logo">DEN</div>
+            <div class="team-info">
+              <h3>Denver Nuggets</h3>
+              <span class="team-situation">Negotiating with a rotation big man</span>
+            </div>
+          </div>
+          <div class="team-context">
+            <div class="context-col">
+              <h4>Team Situation</h4>
+              <div class="context-item">
+                <span class="label">Roster Depth</span>
+                <span class="value neutral">Medium — serviceable backup available</span>
+              </div>
+              <div class="context-item">
+                <span class="label">Cap Space</span>
+                <span class="value neutral">$12M available</span>
+              </div>
+              <div class="context-item">
+                <span class="label">Urgency</span>
+                <span class="value neutral">Medium — defending champs, want continuity</span>
+              </div>
+            </div>
+            <div class="context-col">
+              <h4>Player Situation</h4>
+              <div class="context-item">
+                <span class="label">Role</span>
+                <span class="value">Key rotation player</span>
+              </div>
+              <div class="context-item">
+                <span class="label">Market Interest</span>
+                <span class="value neutral">Limited — 1-2 teams monitoring</span>
+              </div>
+              <div class="context-item">
+                <span class="label">Timeline</span>
+                <span class="value">Mid free agency</span>
+              </div>
+            </div>
+          </div>
+          <div class="team-question">
+            <span class="q-label">Who has leverage?</span>
+            <div class="options" data-question="p1-nuggets">
+              <button class="opt" data-value="Team">Team</button>
+              <button class="opt" data-value="Player">Player</button>
+              <button class="opt" data-value="Balanced">Balanced</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn-secondary" id="backToIntro">Back</button>
+          <button class="btn-primary" id="toPhase2" disabled>Continue</button>
         </div>
       </div>
     </section>
 
-    <!-- PHASE 2: Leverage Shifts -->
-    <section class="phase-section" id="phase-2">
-      <div class="container">
-        <div class="phase-header">
-          <span class="phase-badge">Phase 2</span>
+    <!-- PHASE 2 -->
+    <section class="screen" id="phase-2">
+      <div class="wrap">
+        <div class="phase-head">
+          <span class="phase-tag">Phase 2 of 4</span>
           <h2>Leverage Shifts</h2>
-          <p class="phase-instruction">After each update, identify how leverage moved compared to Phase 1.</p>
-          <p class="phase-hint">Focus on deadlines, outside options, and replaceability — not fairness or talent.</p>
+          <p>Breaking news changes the landscape. How does leverage shift vs. Phase 1?</p>
         </div>
 
         <!-- Update 1 -->
-        <div class="update-card">
+        <div class="update-block">
           <div class="update-header">
-            <span class="update-badge">Update 1</span>
-            <h3>Deadline Compresses</h3>
+            <span class="update-num">Update 1</span>
+            <h3>Deadline Approaches</h3>
           </div>
-          <div class="update-alert">
-            <span class="alert-icon">⚡</span>
-            <p><strong>League Update:</strong> The trade deadline is now two weeks away. Teams are beginning to lock in rosters.</p>
+          <div class="update-news">
+            <span class="news-icon">📅</span>
+            <p><strong>ESPN:</strong> Free agency moratorium ends in 48 hours. Teams are finalizing rosters.</p>
           </div>
-          <div class="shift-questions">
+          <div class="shift-grid">
             <div class="shift-row">
-              <span class="team-label harbor-label">Harbor City</span>
-              <div class="answer-options compact" data-question="p2-u1-harbor">
-                <button class="option-btn" data-value="Shifted toward team">→ Team</button>
-                <button class="option-btn" data-value="Stayed the same">Same</button>
-                <button class="option-btn" data-value="Shifted toward player">→ Player</button>
+              <span class="shift-team lakers-text">Lakers</span>
+              <div class="options compact" data-question="p2-u1-lakers">
+                <button class="opt" data-value="Shifted toward team">→ Team</button>
+                <button class="opt" data-value="Stayed the same">Same</button>
+                <button class="opt" data-value="Shifted toward player">→ Player</button>
               </div>
             </div>
             <div class="shift-row">
-              <span class="team-label ironclad-label">Ironclad</span>
-              <div class="answer-options compact" data-question="p2-u1-ironclad">
-                <button class="option-btn" data-value="Shifted toward team">→ Team</button>
-                <button class="option-btn" data-value="Stayed the same">Same</button>
-                <button class="option-btn" data-value="Shifted toward player">→ Player</button>
+              <span class="shift-team suns-text">Suns</span>
+              <div class="options compact" data-question="p2-u1-suns">
+                <button class="opt" data-value="Shifted toward team">→ Team</button>
+                <button class="opt" data-value="Stayed the same">Same</button>
+                <button class="opt" data-value="Shifted toward player">→ Player</button>
               </div>
             </div>
             <div class="shift-row">
-              <span class="team-label summit-label">Summit</span>
-              <div class="answer-options compact" data-question="p2-u1-summit">
-                <button class="option-btn" data-value="Shifted toward team">→ Team</button>
-                <button class="option-btn" data-value="Stayed the same">Same</button>
-                <button class="option-btn" data-value="Shifted toward player">→ Player</button>
+              <span class="shift-team nuggets-text">Nuggets</span>
+              <div class="options compact" data-question="p2-u1-nuggets">
+                <button class="opt" data-value="Shifted toward team">→ Team</button>
+                <button class="opt" data-value="Stayed the same">Same</button>
+                <button class="opt" data-value="Shifted toward player">→ Player</button>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Update 2 -->
-        <div class="update-card">
+        <div class="update-block">
           <div class="update-header">
-            <span class="update-badge">Update 2</span>
+            <span class="update-num">Update 2</span>
             <h3>Market Thins</h3>
           </div>
-          <div class="update-alert">
-            <span class="alert-icon">📉</span>
-            <p><strong>League Update:</strong> Two comparable free agents at this position have signed elsewhere.</p>
+          <div class="update-news">
+            <span class="news-icon">📉</span>
+            <p><strong>Woj:</strong> Two comparable free agents have signed elsewhere. The market at this position is drying up.</p>
           </div>
-          <div class="shift-questions">
+          <div class="shift-grid">
             <div class="shift-row">
-              <span class="team-label harbor-label">Harbor City</span>
-              <div class="answer-options compact" data-question="p2-u2-harbor">
-                <button class="option-btn" data-value="Shifted toward team">→ Team</button>
-                <button class="option-btn" data-value="Stayed the same">Same</button>
-                <button class="option-btn" data-value="Shifted toward player">→ Player</button>
+              <span class="shift-team lakers-text">Lakers</span>
+              <div class="options compact" data-question="p2-u2-lakers">
+                <button class="opt" data-value="Shifted toward team">→ Team</button>
+                <button class="opt" data-value="Stayed the same">Same</button>
+                <button class="opt" data-value="Shifted toward player">→ Player</button>
               </div>
             </div>
             <div class="shift-row">
-              <span class="team-label ironclad-label">Ironclad</span>
-              <div class="answer-options compact" data-question="p2-u2-ironclad">
-                <button class="option-btn" data-value="Shifted toward team">→ Team</button>
-                <button class="option-btn" data-value="Stayed the same">Same</button>
-                <button class="option-btn" data-value="Shifted toward player">→ Player</button>
+              <span class="shift-team suns-text">Suns</span>
+              <div class="options compact" data-question="p2-u2-suns">
+                <button class="opt" data-value="Shifted toward team">→ Team</button>
+                <button class="opt" data-value="Stayed the same">Same</button>
+                <button class="opt" data-value="Shifted toward player">→ Player</button>
               </div>
             </div>
             <div class="shift-row">
-              <span class="team-label summit-label">Summit</span>
-              <div class="answer-options compact" data-question="p2-u2-summit">
-                <button class="option-btn" data-value="Shifted toward team">→ Team</button>
-                <button class="option-btn" data-value="Stayed the same">Same</button>
-                <button class="option-btn" data-value="Shifted toward player">→ Player</button>
+              <span class="shift-team nuggets-text">Nuggets</span>
+              <div class="options compact" data-question="p2-u2-nuggets">
+                <button class="opt" data-value="Shifted toward team">→ Team</button>
+                <button class="opt" data-value="Stayed the same">Same</button>
+                <button class="opt" data-value="Shifted toward player">→ Player</button>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Update 3 -->
-        <div class="update-card">
+        <div class="update-block">
           <div class="update-header">
-            <span class="update-badge">Update 3</span>
-            <h3>External Shock</h3>
+            <span class="update-num">Update 3</span>
+            <h3>Injury News</h3>
           </div>
-          <div class="update-alert">
-            <span class="alert-icon">🚨</span>
-            <p><strong>League Update:</strong> A contending team suffers an injury at this position and is now seeking a starter.</p>
+          <div class="update-news">
+            <span class="news-icon">🚨</span>
+            <p><strong>Shams:</strong> A contending team just lost their starter to a torn ACL. They're now aggressively pursuing options.</p>
           </div>
-          <div class="shift-questions">
+          <div class="shift-grid">
             <div class="shift-row">
-              <span class="team-label harbor-label">Harbor City</span>
-              <div class="answer-options compact" data-question="p2-u3-harbor">
-                <button class="option-btn" data-value="Shifted toward team">→ Team</button>
-                <button class="option-btn" data-value="Stayed the same">Same</button>
-                <button class="option-btn" data-value="Shifted toward player">→ Player</button>
+              <span class="shift-team lakers-text">Lakers</span>
+              <div class="options compact" data-question="p2-u3-lakers">
+                <button class="opt" data-value="Shifted toward team">→ Team</button>
+                <button class="opt" data-value="Stayed the same">Same</button>
+                <button class="opt" data-value="Shifted toward player">→ Player</button>
               </div>
             </div>
             <div class="shift-row">
-              <span class="team-label ironclad-label">Ironclad</span>
-              <div class="answer-options compact" data-question="p2-u3-ironclad">
-                <button class="option-btn" data-value="Shifted toward team">→ Team</button>
-                <button class="option-btn" data-value="Stayed the same">Same</button>
-                <button class="option-btn" data-value="Shifted toward player">→ Player</button>
+              <span class="shift-team suns-text">Suns</span>
+              <div class="options compact" data-question="p2-u3-suns">
+                <button class="opt" data-value="Shifted toward team">→ Team</button>
+                <button class="opt" data-value="Stayed the same">Same</button>
+                <button class="opt" data-value="Shifted toward player">→ Player</button>
               </div>
             </div>
             <div class="shift-row">
-              <span class="team-label summit-label">Summit</span>
-              <div class="answer-options compact" data-question="p2-u3-summit">
-                <button class="option-btn" data-value="Shifted toward team">→ Team</button>
-                <button class="option-btn" data-value="Stayed the same">Same</button>
-                <button class="option-btn" data-value="Shifted toward player">→ Player</button>
+              <span class="shift-team nuggets-text">Nuggets</span>
+              <div class="options compact" data-question="p2-u3-nuggets">
+                <button class="opt" data-value="Shifted toward team">→ Team</button>
+                <button class="opt" data-value="Stayed the same">Same</button>
+                <button class="opt" data-value="Shifted toward player">→ Player</button>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="phase-nav">
-          <button class="btn btn-secondary" id="backToPhase1">← Back to Phase 1</button>
-          <button class="btn btn-primary" id="toPhase3" disabled>Continue to Phase 3 →</button>
+        <div class="nav-buttons">
+          <button class="btn-secondary" id="backToPhase1">Back</button>
+          <button class="btn-primary" id="toPhase3" disabled>Continue</button>
         </div>
       </div>
     </section>
 
-    <!-- PHASE 3: Drivers -->
-    <section class="phase-section" id="phase-3">
-      <div class="container">
-        <div class="phase-header">
-          <span class="phase-badge">Phase 3</span>
-          <h2>What Drove the Shifts</h2>
-          <p class="phase-instruction">Classify replaceability and dependence — then infer leverage level.</p>
+    <!-- PHASE 3 -->
+    <section class="screen" id="phase-3">
+      <div class="wrap">
+        <div class="phase-head">
+          <span class="phase-tag">Phase 3 of 4</span>
+          <h2>Diagnose the Drivers</h2>
+          <p>What's actually causing these leverage positions?</p>
         </div>
 
-        <div class="framework-box">
-          <h4>Framework</h4>
-          <p>Leverage moves when two things change:</p>
+        <div class="framework">
+          <h4>The Leverage Formula</h4>
+          <p>Leverage = f(Replaceability, Dependence)</p>
           <ul>
-            <li>How easy you are to <strong>replace</strong> in the market</li>
-            <li>How disruptive it is if you <strong>leave</strong> this team</li>
+            <li><strong>Replaceability:</strong> How easy is it to find an alternative in the market?</li>
+            <li><strong>Dependence:</strong> How much does the team need this specific player?</li>
           </ul>
-          <p>For each team's negotiation situation, classify the underlying drivers — then infer overall leverage.</p>
         </div>
 
-        <div class="matrix-container">
-          <table class="driver-matrix">
+        <div class="matrix-wrap">
+          <table class="matrix">
             <thead>
               <tr>
-                <th>Team / Player</th>
+                <th>Team</th>
                 <th>Market Replaceability</th>
                 <th>Team Dependence</th>
                 <th>Leverage Holder</th>
@@ -385,71 +408,71 @@
             </thead>
             <tbody>
               <tr>
-                <td class="team-cell harbor-label">Harbor City</td>
+                <td class="team-cell lakers-text">Lakers</td>
                 <td>
-                  <div class="answer-options matrix-options" data-question="p3-harbor-replace">
-                    <button class="option-btn small" data-value="Deep">Deep</button>
-                    <button class="option-btn small" data-value="Medium">Medium</button>
-                    <button class="option-btn small" data-value="Thin">Thin</button>
+                  <div class="options mini" data-question="p3-lakers-replace">
+                    <button class="opt" data-value="Deep">Deep</button>
+                    <button class="opt" data-value="Medium">Medium</button>
+                    <button class="opt" data-value="Thin">Thin</button>
                   </div>
                 </td>
                 <td>
-                  <div class="answer-options matrix-options" data-question="p3-harbor-depend">
-                    <button class="option-btn small" data-value="Low">Low</button>
-                    <button class="option-btn small" data-value="Medium">Medium</button>
-                    <button class="option-btn small" data-value="High">High</button>
+                  <div class="options mini" data-question="p3-lakers-depend">
+                    <button class="opt" data-value="Low">Low</button>
+                    <button class="opt" data-value="Medium">Medium</button>
+                    <button class="opt" data-value="High">High</button>
                   </div>
                 </td>
                 <td>
-                  <div class="answer-options matrix-options" data-question="p3-harbor-leverage">
-                    <button class="option-btn small" data-value="Team">Team</button>
-                    <button class="option-btn small" data-value="Player">Player</button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="team-cell ironclad-label">Ironclad</td>
-                <td>
-                  <div class="answer-options matrix-options" data-question="p3-ironclad-replace">
-                    <button class="option-btn small" data-value="Deep">Deep</button>
-                    <button class="option-btn small" data-value="Medium">Medium</button>
-                    <button class="option-btn small" data-value="Thin">Thin</button>
-                  </div>
-                </td>
-                <td>
-                  <div class="answer-options matrix-options" data-question="p3-ironclad-depend">
-                    <button class="option-btn small" data-value="Low">Low</button>
-                    <button class="option-btn small" data-value="Medium">Medium</button>
-                    <button class="option-btn small" data-value="High">High</button>
-                  </div>
-                </td>
-                <td>
-                  <div class="answer-options matrix-options" data-question="p3-ironclad-leverage">
-                    <button class="option-btn small" data-value="Team">Team</button>
-                    <button class="option-btn small" data-value="Player">Player</button>
+                  <div class="options mini" data-question="p3-lakers-leverage">
+                    <button class="opt" data-value="Team">Team</button>
+                    <button class="opt" data-value="Player">Player</button>
                   </div>
                 </td>
               </tr>
               <tr>
-                <td class="team-cell summit-label">Summit</td>
+                <td class="team-cell suns-text">Suns</td>
                 <td>
-                  <div class="answer-options matrix-options" data-question="p3-summit-replace">
-                    <button class="option-btn small" data-value="Deep">Deep</button>
-                    <button class="option-btn small" data-value="Medium">Medium</button>
-                    <button class="option-btn small" data-value="Thin">Thin</button>
+                  <div class="options mini" data-question="p3-suns-replace">
+                    <button class="opt" data-value="Deep">Deep</button>
+                    <button class="opt" data-value="Medium">Medium</button>
+                    <button class="opt" data-value="Thin">Thin</button>
                   </div>
                 </td>
                 <td>
-                  <div class="answer-options matrix-options" data-question="p3-summit-depend">
-                    <button class="option-btn small" data-value="Low">Low</button>
-                    <button class="option-btn small" data-value="Medium">Medium</button>
-                    <button class="option-btn small" data-value="High">High</button>
+                  <div class="options mini" data-question="p3-suns-depend">
+                    <button class="opt" data-value="Low">Low</button>
+                    <button class="opt" data-value="Medium">Medium</button>
+                    <button class="opt" data-value="High">High</button>
                   </div>
                 </td>
                 <td>
-                  <div class="answer-options matrix-options" data-question="p3-summit-leverage">
-                    <button class="option-btn small" data-value="Team">Team</button>
-                    <button class="option-btn small" data-value="Player">Player</button>
+                  <div class="options mini" data-question="p3-suns-leverage">
+                    <button class="opt" data-value="Team">Team</button>
+                    <button class="opt" data-value="Player">Player</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="team-cell nuggets-text">Nuggets</td>
+                <td>
+                  <div class="options mini" data-question="p3-nuggets-replace">
+                    <button class="opt" data-value="Deep">Deep</button>
+                    <button class="opt" data-value="Medium">Medium</button>
+                    <button class="opt" data-value="Thin">Thin</button>
+                  </div>
+                </td>
+                <td>
+                  <div class="options mini" data-question="p3-nuggets-depend">
+                    <button class="opt" data-value="Low">Low</button>
+                    <button class="opt" data-value="Medium">Medium</button>
+                    <button class="opt" data-value="High">High</button>
+                  </div>
+                </td>
+                <td>
+                  <div class="options mini" data-question="p3-nuggets-leverage">
+                    <button class="opt" data-value="Team">Team</button>
+                    <button class="opt" data-value="Player">Player</button>
                   </div>
                 </td>
               </tr>
@@ -457,132 +480,118 @@
           </table>
         </div>
 
-        <div class="phase-nav">
-          <button class="btn btn-secondary" id="backToPhase2">← Back to Phase 2</button>
-          <button class="btn btn-primary" id="toPhase4" disabled>Continue to Phase 4 →</button>
+        <div class="nav-buttons">
+          <button class="btn-secondary" id="backToPhase2">Back</button>
+          <button class="btn-primary" id="toPhase4" disabled>Continue</button>
         </div>
       </div>
     </section>
 
-    <!-- PHASE 4: Walk-Away Test -->
-    <section class="phase-section" id="phase-4">
-      <div class="container">
-        <div class="phase-header">
-          <span class="phase-badge">Phase 4</span>
+    <!-- PHASE 4 -->
+    <section class="screen" id="phase-4">
+      <div class="wrap">
+        <div class="phase-head">
+          <span class="phase-tag">Phase 4 of 4</span>
           <h2>The Walk-Away Test</h2>
-          <p class="phase-instruction">Answer the only question that matters: who can afford to say no?</p>
+          <p>The only question that matters: who can afford to say no?</p>
         </div>
 
-        <div class="scenario-card">
-          <div class="scenario-header">
-            <span class="scenario-badge">Final Scenario</span>
-            <h3>Summit Negotiation</h3>
+        <div class="scenario">
+          <div class="scenario-head">
+            <div class="team-logo">DEN</div>
+            <div>
+              <h3>Final Scenario: Nuggets Negotiation</h3>
+              <span>Current state after all updates</span>
+            </div>
           </div>
-          <div class="scenario-body">
-            <h4>Current Conditions:</h4>
-            <ul class="scenario-conditions">
-              <li>Season approaching midpoint</li>
-              <li>Market thinning</li>
-              <li>Summit has a serviceable replacement (performance would drop)</li>
-              <li>Player has moderate external interest (not guaranteed offers)</li>
-            </ul>
-            <p class="scenario-note"><em>No new information will arrive before the deadline.</em></p>
+          <div class="scenario-facts">
+            <div class="fact">Free agency entering final 48 hours</div>
+            <div class="fact">Market has thinned significantly</div>
+            <div class="fact">Nuggets have a serviceable backup (performance would drop)</div>
+            <div class="fact">Player has moderate interest from one other team (not guaranteed)</div>
           </div>
+          <p class="scenario-note">No new information will arrive before the deadline.</p>
         </div>
 
-        <div class="walkaway-questions">
-          <div class="walkaway-question">
-            <label class="question-label large">Who can afford to say no right now?</label>
-            <div class="answer-options" data-question="p4-who">
-              <button class="option-btn" data-value="Team">Team</button>
-              <button class="option-btn" data-value="Player">Player</button>
-              <button class="option-btn" data-value="Both">Both</button>
-              <button class="option-btn" data-value="Neither">Neither</button>
+        <div class="final-questions">
+          <div class="final-q">
+            <h4>Who can afford to walk away right now?</h4>
+            <div class="options" data-question="p4-who">
+              <button class="opt" data-value="Team">Team</button>
+              <button class="opt" data-value="Player">Player</button>
+              <button class="opt" data-value="Both">Both</button>
+              <button class="opt" data-value="Neither">Neither</button>
             </div>
           </div>
 
-          <div class="walkaway-question">
-            <label class="question-label large">If they do say no, what happens?</label>
-            <div class="answer-options" data-question="p4-consequence">
-              <button class="option-btn" data-value="Minimal damage">Minimal damage</button>
-              <button class="option-btn" data-value="Moderate setback">Moderate setback</button>
-              <button class="option-btn" data-value="Severe disruption">Severe disruption</button>
+          <div class="final-q">
+            <h4>If the team walks away, what's the damage?</h4>
+            <div class="options" data-question="p4-consequence">
+              <button class="opt" data-value="Minimal damage">Minimal</button>
+              <button class="opt" data-value="Moderate setback">Moderate</button>
+              <button class="opt" data-value="Severe disruption">Severe</button>
             </div>
           </div>
         </div>
 
-        <div class="phase-nav">
-          <button class="btn btn-secondary" id="backToPhase3">← Back to Phase 3</button>
-          <button class="btn btn-primary btn-submit" id="submitSim" disabled>
-            Submit & Get Results
-            <span class="btn-arrow">→</span>
-          </button>
+        <div class="nav-buttons">
+          <button class="btn-secondary" id="backToPhase3">Back</button>
+          <button class="btn-primary" id="submitSim" disabled>Submit</button>
         </div>
       </div>
     </section>
 
-    <!-- RESULTS DASHBOARD -->
-    <section class="phase-section" id="phase-results">
-      <div class="container">
-        <div class="results-card">
-          <div class="results-header">
-            <h2>SIM OUTCOME</h2>
-            <p class="results-subtitle">Structural Leverage</p>
+    <!-- RESULTS -->
+    <section class="screen" id="phase-results">
+      <div class="wrap">
+        <div class="results">
+          <div class="results-top">
+            <h2>Simulation Complete</h2>
+            <p id="analystInfo"></p>
           </div>
 
-          <div class="analyst-info" id="analystInfo">
-            <!-- Populated by JS -->
-          </div>
-
-          <div class="score-display">
-            <div class="score-box">
-              <span class="score-label">SCORE</span>
-              <span class="score-value" id="scoreValue">--</span>
-              <span class="score-total">/ 23</span>
+          <div class="score-row">
+            <div class="score-card">
+              <span class="score-label">Score</span>
+              <div class="score-big">
+                <span id="scoreValue">--</span>
+                <span class="score-max">/23</span>
+              </div>
             </div>
-            <div class="tier-box" id="tierBox">
-              <span class="tier-label">TIER</span>
-              <span class="tier-value" id="tierValue">--</span>
-              <span class="xp-value" id="xpValue">-- XP</span>
+            <div class="tier-card" id="tierBox">
+              <span class="tier-label">Tier</span>
+              <span class="tier-badge" id="tierValue">--</span>
+              <span class="tier-xp" id="xpValue">-- XP</span>
             </div>
           </div>
 
-          <div class="claim-code-section">
-            <h3>CLAIM CODE</h3>
-            <div class="claim-code-box" id="claimCodeBox">
-              <span class="claim-code" id="claimCode">--</span>
-              <button class="copy-btn" id="copyCode" title="Copy to clipboard">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-              </button>
+          <div class="claim-section">
+            <h3>Your Claim Code</h3>
+            <div class="claim-box">
+              <code id="claimCode">--</code>
+              <button class="copy-btn" id="copyCode">Copy</button>
             </div>
-            <p class="claim-code-note">Your claim code is deterministic. Same name/email + lesson + tier = same code.</p>
+            <p class="claim-note">This code is the same for everyone at your tier.</p>
           </div>
 
-          <div class="results-breakdown" id="resultsBreakdown">
-            <!-- Populated by JS -->
-          </div>
+          <div class="breakdown" id="resultsBreakdown"></div>
 
-          <div class="tier-legend">
-            <h4>Tier Meaning</h4>
-            <div class="legend-item gold"><strong>GOLD:</strong> Accurate structural reads across shifting conditions.</div>
-            <div class="legend-item silver"><strong>SILVER:</strong> Strong instincts; missed some subtle shifts.</div>
-            <div class="legend-item bronze"><strong>BRONZE:</strong> Partial understanding; revisit BATNA and replaceability.</div>
-            <div class="legend-item fail"><strong>NOT YET:</strong> Rewatch Lesson 1 and try again.</div>
+          <div class="tier-info">
+            <div class="tier-row gold-row"><strong>GOLD (21+):</strong> Accurate structural reads across shifting conditions.</div>
+            <div class="tier-row silver-row"><strong>SILVER (17-20):</strong> Strong instincts; missed some subtle shifts.</div>
+            <div class="tier-row bronze-row"><strong>BRONZE (13-16):</strong> Partial understanding; revisit BATNA and replaceability.</div>
+            <div class="tier-row fail-row"><strong>NOT YET (&lt;13):</strong> Review the lesson and try again.</div>
           </div>
 
           <div class="results-actions">
-            <button class="btn btn-secondary" id="reviewAnswers">Review Answers</button>
-            <button class="btn btn-primary" id="restartSim">Try Again</button>
+            <button class="btn-secondary" id="reviewAnswers">Review Answers</button>
+            <button class="btn-primary" id="restartSim">Try Again</button>
           </div>
         </div>
       </div>
     </section>
-  </main>
+  </div>
 
-  <!-- Toast notification -->
   <div class="toast" id="toast"></div>
 
   <script src="js/app.js"></script>
